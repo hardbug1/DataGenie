@@ -1,0 +1,47 @@
+# Development Dockerfile for DataGenie
+FROM python:3.12-slim
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    DEBUG=True
+
+# Set work directory
+WORKDIR /app
+
+# Install system dependencies including development tools
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    libpq-dev \
+    git \
+    vim \
+    htop \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements files
+COPY requirements/base.txt requirements/dev.txt ./
+
+# Install Python dependencies (including dev dependencies)
+RUN pip install --no-cache-dir -r dev.txt
+
+# Create necessary directories
+RUN mkdir -p logs uploads app tests scripts
+
+# Copy application code (will be overridden by volume mounts in dev)
+COPY app/ ./app/
+COPY tests/ ./tests/
+COPY scripts/ ./scripts/
+
+# Expose port
+EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Run application with reload for development
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

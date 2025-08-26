@@ -1,0 +1,108 @@
+# Development-specific configuration
+services:
+  # Development App Service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: datagenie-app-dev
+    environment:
+      - DEBUG=True
+      - RELOAD=True
+      - LOG_LEVEL=DEBUG
+    volumes:
+      - ./app:/app/app  # Mount source code for hot reload
+      - ./tests:/app/tests
+      - ./logs:/app/logs
+      - ./uploads:/app/uploads
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    ports:
+      - "8001:8000"  # Different port for dev
+    networks:
+      - datagenie-dev-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Development Database (with exposed ports for debugging)
+  postgres:
+    image: postgres:15-alpine
+    container_name: datagenie-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: datagenie_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: devpassword
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./scripts/dev_init.sql:/docker-entrypoint-initdb.d/dev_init.sql:ro
+    ports:
+      - "5433:5432"  # Different port for dev
+    networks:
+      - datagenie-dev-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d datagenie_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Development Redis
+  redis:
+    image: redis:7-alpine
+    container_name: datagenie-redis-dev
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_dev_data:/data
+    ports:
+      - "6380:6379"  # Different port for dev
+    networks:
+      - datagenie-dev-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # Development Tools
+  adminer:
+    image: adminer:latest
+    container_name: datagenie-adminer-dev
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+    depends_on:
+      - postgres
+    networks:
+      - datagenie-dev-network
+
+  # Redis Commander for Redis management
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: datagenie-redis-commander-dev
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      REDIS_HOSTS: "local:redis:6379"
+    depends_on:
+      - redis
+    networks:
+      - datagenie-dev-network
+
+# Development volumes
+volumes:
+  postgres_dev_data:
+    driver: local
+  redis_dev_data:
+    driver: local
+
+# Development network
+networks:
+  datagenie-dev-network:
+    driver: bridge
