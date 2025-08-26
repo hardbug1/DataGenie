@@ -1,0 +1,246 @@
+---
+globs: app/api/**/*.py,app/main.py,app/schemas/*.py
+description: FastAPI development standards and API design principles
+---
+
+# DataGenie API Development Rules
+
+## 🎯 FASTAPI EXCELLENCE STANDARDS
+
+### MANDATORY API PATTERNS
+You are building REST APIs for DataGenie's data analysis platform. Every endpoint MUST follow these patterns:
+
+#### 1. ENDPOINT STRUCTURE (NON-NEGOTIABLE)
+```python
+@router.post("/analysis/execute", response_model=AnalysisResponse)
+async def execute_analysis(
+    request: AnalysisRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+) -> AnalysisResponse:
+    """
+    Execute natural language data analysis query.
+    
+    Args:
+        request: Analysis request with question and options
+        current_user: Authenticated user (automatically injected)
+        db: Database session (automatically injected)
+        
+    Returns:
+        AnalysisResponse with results, insights, and visualizations
+        
+    Raises:
+        HTTPException: For validation, permission, or processing errors
+    """
+```
+
+#### 2. RESPONSE FORMAT (ABSOLUTELY REQUIRED)
+```python
+class StandardResponse(BaseModel):
+    success: bool = True
+    data: Optional[Any] = None
+    message: str = "Request processed successfully"
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    request_id: str = Field(default_factory=lambda: str(uuid4()))
+
+class ErrorResponse(BaseModel):
+    success: bool = False
+    error: ErrorDetail
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    request_id: str = Field(default_factory=lambda: str(uuid4()))
+```
+
+## ⚡ CRITICAL MUST-DO RULES
+
+### 1. SECURITY IMPLEMENTATION
+- **ALWAYS** validate JWT tokens on protected endpoints
+- **MANDATORY** rate limiting (100 requests/minute per user)
+- **REQUIRED** input sanitization on ALL user data
+- **ESSENTIAL** SQL injection prevention with parameterized queries
+- **CRITICAL** personal data masking in responses
+
+### 2. ERROR HANDLING EXCELLENCE
+```python
+# REQUIRED ERROR HANDLING PATTERN
+try:
+    result = await dangerous_operation()
+    return StandardResponse(data=result)
+except ValidationError as e:
+    logger.warning("Validation failed", extra={"error": str(e)})
+    raise HTTPException(status_code=422, detail="Invalid input data")
+except DatabaseError as e:
+    logger.error("Database operation failed", extra={"error": str(e)})
+    raise HTTPException(status_code=500, detail="Data processing failed")
+except Exception as e:
+    logger.error("Unexpected error", extra={"error": str(e), "traceback": traceback.format_exc()})
+    raise HTTPException(status_code=500, detail="Internal server error")
+```
+
+### 3. PERFORMANCE OPTIMIZATION
+- **MANDATORY** async/await for all I/O operations
+- **REQUIRED** database connection pooling
+- **ESSENTIAL** Redis caching for expensive operations
+- **CRITICAL** request timeout limits (30 seconds max)
+
+## 🚫 ABSOLUTE PROHIBITIONS
+
+### 1. SECURITY VIOLATIONS
+- **NEVER** return raw database errors to clients
+- **NEVER** execute user input as code without sandboxing
+- **NEVER** log sensitive data (passwords, tokens, personal info)
+- **NEVER** skip authentication on data access endpoints
+- **NEVER** allow unbounded query parameters
+
+### 2. PERFORMANCE KILLERS
+- **NEVER** use blocking I/O operations
+- **NEVER** load large datasets without pagination
+- **NEVER** forget to close database connections
+- **NEVER** make API calls without timeout
+- **NEVER** skip caching for repeated operations
+
+### 3. API DESIGN MISTAKES
+- **NEVER** use GET requests for data modifications
+- **NEVER** return inconsistent response formats
+- **NEVER** expose internal implementation details
+- **NEVER** ignore HTTP status code semantics
+- **NEVER** skip request/response validation
+
+## 📊 REQUIRED API ENDPOINTS
+
+### Core Analysis Endpoints
+```python
+# Primary analysis endpoint
+POST /api/v1/analysis/execute
+- Body: {question: str, connection_id?: str, options?: dict}
+- Response: {success: bool, data: AnalysisResult, message: str}
+
+# Excel analysis endpoint  
+POST /api/v1/excel/{file_id}/analyze
+- Body: {question: str, options?: dict}
+- Response: {success: bool, data: ExcelAnalysisResult, message: str}
+
+# Query history
+GET /api/v1/history/questions?page=1&limit=20
+- Response: {success: bool, data: {questions: List[QueryHistory], pagination: PaginationInfo}}
+```
+
+### Database Management Endpoints
+```python
+# List available connections
+GET /api/v1/connections
+- Response: {success: bool, data: {connections: List[DatabaseConnection]}}
+
+# Get connection details
+GET /api/v1/connections/{connection_id}
+- Response: {success: bool, data: DatabaseConnectionDetail}
+
+# Refresh schema information
+POST /api/v1/connections/{connection_id}/refresh-schema
+- Response: {success: bool, data: {updated_at: datetime, changes: dict}}
+```
+
+## 🔄 REQUEST/RESPONSE PATTERNS
+
+### Authentication Flow
+```python
+# REQUIRED: All protected endpoints must use this pattern
+@router.post("/protected-endpoint")
+async def protected_operation(
+    current_user: User = Depends(get_current_active_user)
+):
+    # Automatically validates JWT and returns user object
+    # Raises HTTPException(401) if token invalid
+    # Raises HTTPException(403) if user inactive
+```
+
+### Validation Patterns
+```python
+# MANDATORY: Use Pydantic models for ALL request/response data
+class AnalysisRequest(BaseModel):
+    question: str = Field(..., min_length=1, max_length=1000, description="Natural language question")
+    connection_id: Optional[str] = Field(None, description="Database connection ID")
+    options: Optional[Dict[str, Any]] = Field(default_factory=dict)
+    
+    @validator('question')
+    def validate_question(cls, v):
+        if not v.strip():
+            raise ValueError('Question cannot be empty')
+        return v.strip()
+```
+
+### Pagination Standard
+```python
+# REQUIRED: Use this pattern for all list endpoints
+class PaginationParams(BaseModel):
+    page: int = Field(1, ge=1, description="Page number")
+    limit: int = Field(20, ge=1, le=100, description="Items per page")
+
+class PaginatedResponse(BaseModel):
+    items: List[Any]
+    total: int
+    page: int
+    limit: int
+    has_next: bool
+    has_prev: bool
+```
+
+## 🎨 API DOCUMENTATION REQUIREMENTS
+
+### OpenAPI Schema
+- **MANDATORY** detailed descriptions for all endpoints
+- **REQUIRED** example requests and responses
+- **ESSENTIAL** error code documentation
+- **CRITICAL** parameter validation rules
+
+### Example Documentation
+```python
+@router.post(
+    "/analysis/execute",
+    response_model=AnalysisResponse,
+    summary="Execute natural language data analysis",
+    description="""
+    Processes a natural language question and returns analysis results.
+    
+    The system will:
+    1. Analyze the question to determine intent
+    2. Generate appropriate SQL or Excel analysis code
+    3. Execute the analysis safely
+    4. Create visualizations if applicable
+    5. Return insights and recommendations
+    """,
+    responses={
+        200: {"description": "Analysis completed successfully"},
+        400: {"description": "Invalid question or parameters"},
+        401: {"description": "Authentication required"},
+        422: {"description": "Question validation failed"},
+        500: {"description": "Analysis processing failed"}
+    }
+)
+```
+
+## 🔧 MIDDLEWARE REQUIREMENTS
+
+### Essential Middleware Stack
+```python
+# REQUIRED: Apply in this exact order
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.ALLOWED_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=settings.ALLOWED_HOSTS)
+
+# Custom middleware for request tracking
+@app.middleware("http")
+async def add_request_id(request: Request, call_next):
+    request_id = str(uuid4())
+    with logger.contextualize(request_id=request_id):
+        response = await call_next(request)
+        response.headers["X-Request-ID"] = request_id
+        return response
+```
+
+Remember: Every API endpoint is a gateway to sensitive data analysis. Security, performance, and reliability are non-negotiable requirements.

@@ -1,0 +1,442 @@
+---
+globs: app/core/nlp/*.py,app/core/query/*.py
+description: LLM integration and prompt engineering best practices
+---
+
+# DataGenie LLM Integration & Prompt Engineering Rules
+
+## 🤖 LLM INTEGRATION EXCELLENCE
+
+### CRITICAL CONTEXT
+You are integrating **OpenAI GPT-4** into DataGenie for natural language to SQL/Python conversion. Every prompt must be **PRECISION-ENGINEERED** for maximum accuracy and security.
+
+## ⚡ MANDATORY LLM PATTERNS
+
+### 1. PROMPT ENGINEERING PERFECTION
+```python
+# ✅ REQUIRED: Use this exact prompt structure for SQL generation
+SQL_GENERATION_PROMPT = PromptTemplate(
+    input_variables=["question", "schema_info", "examples"],
+    template="""
+You are an expert SQL analyst for DataGenie, a data analysis platform.
+
+CRITICAL RULES:
+- Generate ONLY SELECT queries (NEVER INSERT/UPDATE/DELETE/DROP)
+- Use parameterized queries to prevent SQL injection
+- Limit results to maximum 1000 rows
+- Include proper error handling
+- Generate PostgreSQL/MySQL compatible syntax
+
+DATABASE SCHEMA:
+{schema_info}
+
+EXAMPLE QUERIES:
+{examples}
+
+USER QUESTION: {question}
+
+RESPONSE FORMAT (JSON):
+{{
+    "sql": "SELECT column1, column2 FROM table WHERE condition",
+    "explanation": "Brief explanation of what the query does",
+    "estimated_rows": 150,
+    "confidence": 0.95,
+    "warnings": ["Any potential issues or limitations"]
+}}
+
+SQL Query:
+"""
+)
+
+# ✅ REQUIRED: Excel analysis prompt template
+EXCEL_ANALYSIS_PROMPT = PromptTemplate(
+    input_variables=["question", "dataframe_info", "sample_data"],
+    template="""
+You are an expert Python data analyst for DataGenie.
+
+CRITICAL RULES:
+- Generate ONLY safe pandas operations
+- NO file system access (no open(), read_csv() with paths)
+- NO network requests (no requests, urllib)
+- NO subprocess or system calls
+- Use ONLY provided dataframe variable 'df'
+- Include proper error handling
+
+DATAFRAME INFO:
+{dataframe_info}
+
+SAMPLE DATA:
+{sample_data}
+
+USER QUESTION: {question}
+
+RESPONSE FORMAT (JSON):
+{{
+    "code": "# Python pandas code here",
+    "explanation": "What the analysis does",
+    "expected_output": "Description of expected results",
+    "confidence": 0.92,
+    "safety_check": "confirmed_safe"
+}}
+
+Python Code:
+"""
+)
+```
+
+### 2. SAFETY-FIRST LLM CALLS
+```python
+# ✅ MANDATORY: Always use this pattern for LLM interactions
+class SafeLLMProcessor:
+    """REQUIRED wrapper for all LLM operations."""
+    
+    def __init__(self):
+        self.llm = ChatOpenAI(
+            model="gpt-4",
+            temperature=0.0,  # REQUIRED: Deterministic output
+            max_tokens=2000,  # REQUIRED: Prevent runaway generation
+            timeout=30,       # REQUIRED: Prevent hanging
+            max_retries=2     # REQUIRED: Handle transient failures
+        )
+        self.safety_validator = SafetyValidator()
+    
+    async def generate_sql(
+        self, 
+        question: str, 
+        schema_info: Dict[str, Any],
+        user_context: Optional[Dict] = None
+    ) -> SQLGenerationResult:
+        """MANDATORY pattern for SQL generation."""
+        
+        # 1. REQUIRED: Input validation
+        if not question.strip():
+            raise ValueError("Question cannot be empty")
+        
+        if len(question) > MAX_QUESTION_LENGTH:
+            raise ValueError("Question too long")
+        
+        # 2. REQUIRED: Safety check
+        if self.safety_validator.contains_unsafe_content(question):
+            raise SecurityError("Unsafe content detected in question")
+        
+        # 3. REQUIRED: Prompt construction
+        examples = self._get_relevant_examples(question, schema_info)
+        prompt = SQL_GENERATION_PROMPT.format(
+            question=question,
+            schema_info=self._format_schema_info(schema_info),
+            examples=examples
+        )
+        
+        # 4. REQUIRED: LLM call with error handling
+        try:
+            response = await self.llm.ainvoke(prompt)
+            result = self._parse_sql_response(response.content)
+            
+            # 5. REQUIRED: Output validation
+            self.safety_validator.validate_generated_sql(result.sql)
+            
+            return result
+            
+        except Exception as e:
+            logger.error(
+                "LLM SQL generation failed",
+                extra={
+                    "question_hash": hashlib.sha256(question.encode()).hexdigest()[:16],
+                    "error": str(e)
+                }
+            )
+            raise LLMProcessingError("Failed to generate SQL query")
+```
+
+## 🚫 ABSOLUTE LLM PROHIBITIONS
+
+### 1. NEVER ALLOW UNSAFE OPERATIONS
+```python
+# 🚫 FORBIDDEN: Unsafe SQL operations
+FORBIDDEN_SQL_KEYWORDS = [
+    "INSERT", "UPDATE", "DELETE", "DROP", "CREATE", "ALTER",
+    "TRUNCATE", "EXEC", "EXECUTE", "CALL", "GRANT", "REVOKE",
+    "COMMIT", "ROLLBACK", "SAVEPOINT", "MERGE", "REPLACE"
+]
+
+# 🚫 FORBIDDEN: Dangerous Python operations
+FORBIDDEN_PYTHON_PATTERNS = [
+    r'import\s+(os|sys|subprocess|shutil)',
+    r'exec\s*\(',
+    r'eval\s*\(',
+    r'open\s*\(',
+    r'file\s*\(',
+    r'__import__',
+    r'compile\s*\(',
+    r'globals\s*\(',
+    r'locals\s*\(',
+    r'vars\s*\(',
+    r'dir\s*\(',
+    r'delattr',
+    r'setattr',
+    r'getattr',
+]
+
+# 🚫 NEVER: Trust LLM output without validation
+def unsafe_sql_execution(llm_generated_sql):
+    return database.execute(llm_generated_sql)  # DANGEROUS!
+
+# 🚫 NEVER: Execute LLM code without sandboxing
+def unsafe_code_execution(llm_generated_code):
+    exec(llm_generated_code)  # EXTREMELY DANGEROUS!
+```
+
+### 2. PROMPT INJECTION PREVENTION
+```python
+# ✅ REQUIRED: Prompt injection detection
+class PromptInjectionDetector:
+    """MANDATORY security layer for all user inputs."""
+    
+    INJECTION_PATTERNS = [
+        r'ignore\s+previous\s+instructions',
+        r'forget\s+everything\s+above',
+        r'new\s+instructions?:',
+        r'system\s*:',
+        r'assistant\s*:',
+        r'human\s*:',
+        r'<\|.*?\|>',  # Special tokens
+        r'```.*?```',  # Code blocks in input
+        r'CRITICAL\s+RULES?:',
+        r'RESPONSE\s+FORMAT',
+    ]
+    
+    def detect_injection(self, user_input: str) -> bool:
+        """REQUIRED check before any LLM interaction."""
+        for pattern in self.INJECTION_PATTERNS:
+            if re.search(pattern, user_input, re.IGNORECASE):
+                logger.warning(
+                    "Potential prompt injection detected",
+                    extra={"input_hash": hashlib.sha256(user_input.encode()).hexdigest()[:16]}
+                )
+                return True
+        return False
+```
+
+## 🎯 COST & PERFORMANCE OPTIMIZATION
+
+### 1. INTELLIGENT CACHING STRATEGY
+```python
+# ✅ REQUIRED: Cache LLM responses to minimize costs
+class LLMCache:
+    """MANDATORY caching for all LLM operations."""
+    
+    def __init__(self, redis_client):
+        self.redis = redis_client
+        self.ttl = 3600 * 24  # 24 hours
+    
+    async def get_cached_response(self, prompt_hash: str) -> Optional[Dict]:
+        """Check cache before expensive LLM call."""
+        try:
+            cached = await self.redis.get(f"llm_response:{prompt_hash}")
+            if cached:
+                return json.loads(cached)
+        except Exception as e:
+            logger.warning(f"Cache retrieval failed: {e}")
+        return None
+    
+    async def cache_response(self, prompt_hash: str, response: Dict):
+        """Cache successful LLM responses."""
+        try:
+            await self.redis.setex(
+                f"llm_response:{prompt_hash}",
+                self.ttl,
+                json.dumps(response)
+            )
+        except Exception as e:
+            logger.warning(f"Cache storage failed: {e}")
+    
+    def generate_prompt_hash(self, prompt: str, model: str) -> str:
+        """Generate consistent hash for caching."""
+        content = f"{model}:{prompt}"
+        return hashlib.sha256(content.encode()).hexdigest()
+```
+
+### 2. TOKEN USAGE OPTIMIZATION
+```python
+# ✅ REQUIRED: Monitor and optimize token usage
+class TokenOptimizer:
+    """MANDATORY token usage tracking and optimization."""
+    
+    def __init__(self):
+        self.encoding = tiktoken.encoding_for_model("gpt-4")
+    
+    def count_tokens(self, text: str) -> int:
+        """Count tokens before sending to LLM."""
+        return len(self.encoding.encode(text))
+    
+    def optimize_schema_info(self, schema: Dict) -> str:
+        """Minimize schema description for token efficiency."""
+        optimized = []
+        for table_name, table_info in schema.items():
+            columns = []
+            for col in table_info.get('columns', []):
+                col_desc = f"{col['name']} ({col['type']})"
+                if col.get('primary_key'):
+                    col_desc += " PK"
+                columns.append(col_desc)
+            
+            optimized.append(f"{table_name}: {', '.join(columns)}")
+        
+        return "\n".join(optimized)
+    
+    def truncate_examples(self, examples: List[str], max_tokens: int = 1000) -> List[str]:
+        """Truncate examples to fit token budget."""
+        truncated = []
+        current_tokens = 0
+        
+        for example in examples:
+            example_tokens = self.count_tokens(example)
+            if current_tokens + example_tokens <= max_tokens:
+                truncated.append(example)
+                current_tokens += example_tokens
+            else:
+                break
+        
+        return truncated
+```
+
+## 🔍 QUALITY ASSURANCE
+
+### 1. LLM OUTPUT VALIDATION
+```python
+# ✅ REQUIRED: Validate all LLM outputs
+class LLMOutputValidator:
+    """MANDATORY validation for all LLM-generated content."""
+    
+    def validate_sql_output(self, sql: str) -> bool:
+        """REQUIRED validation for generated SQL."""
+        try:
+            # Parse SQL to check syntax
+            parsed = sqlparse.parse(sql)[0]
+            
+            # Check for forbidden operations
+            for token in parsed.flatten():
+                if token.ttype is Keyword and token.value.upper() in FORBIDDEN_SQL_KEYWORDS:
+                    raise ValidationError(f"Forbidden SQL keyword: {token.value}")
+            
+            # Ensure it's a SELECT statement
+            first_token = next(token for token in parsed.flatten() if not token.is_whitespace)
+            if first_token.value.upper() != "SELECT":
+                raise ValidationError("Only SELECT statements are allowed")
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"SQL validation failed: {e}")
+            return False
+    
+    def validate_python_output(self, code: str) -> bool:
+        """REQUIRED validation for generated Python code."""
+        try:
+            # Parse Python code to check syntax
+            ast.parse(code)
+            
+            # Check for forbidden patterns
+            for pattern in FORBIDDEN_PYTHON_PATTERNS:
+                if re.search(pattern, code, re.IGNORECASE):
+                    raise ValidationError(f"Forbidden Python pattern: {pattern}")
+            
+            # Ensure only pandas operations
+            if 'df.' not in code and 'df[' not in code:
+                raise ValidationError("Code must operate on provided dataframe 'df'")
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Python code validation failed: {e}")
+            return False
+```
+
+### 2. CONFIDENCE SCORING
+```python
+# ✅ REQUIRED: Confidence assessment for LLM outputs
+class ConfidenceAssessor:
+    """MANDATORY confidence scoring for all LLM results."""
+    
+    def assess_sql_confidence(self, question: str, sql: str, schema: Dict) -> float:
+        """Calculate confidence score for SQL generation."""
+        confidence = 1.0
+        
+        # Reduce confidence for complex questions
+        if len(question.split()) > 20:
+            confidence *= 0.9
+        
+        # Reduce confidence for complex SQL
+        if sql.count('JOIN') > 2:
+            confidence *= 0.8
+        
+        # Reduce confidence if referencing unknown tables
+        mentioned_tables = self._extract_table_names(sql)
+        schema_tables = set(schema.keys())
+        unknown_tables = mentioned_tables - schema_tables
+        if unknown_tables:
+            confidence *= 0.5
+        
+        return max(0.1, confidence)  # Minimum 10% confidence
+    
+    def should_proceed_with_confidence(self, confidence: float) -> bool:
+        """Determine if confidence is sufficient to proceed."""
+        return confidence >= 0.7  # Require 70% confidence minimum
+```
+
+## 📊 MONITORING & METRICS
+
+### Required LLM Metrics
+```python
+# ✅ MANDATORY: Track LLM performance metrics
+class LLMMetrics:
+    """REQUIRED monitoring for all LLM operations."""
+    
+    def __init__(self):
+        self.success_rate = Counter()
+        self.response_times = []
+        self.token_usage = Counter()
+        self.confidence_scores = []
+    
+    def record_sql_generation(
+        self, 
+        success: bool, 
+        response_time: float,
+        tokens_used: int,
+        confidence: float
+    ):
+        """Track SQL generation metrics."""
+        self.success_rate['sql_generation'] += 1 if success else 0
+        self.response_times.append(response_time)
+        self.token_usage['total'] += tokens_used
+        self.confidence_scores.append(confidence)
+    
+    def get_performance_summary(self) -> Dict[str, float]:
+        """Generate performance summary for monitoring."""
+        return {
+            "success_rate": self.success_rate['sql_generation'] / max(1, len(self.response_times)),
+            "avg_response_time": sum(self.response_times) / max(1, len(self.response_times)),
+            "total_tokens_used": self.token_usage['total'],
+            "avg_confidence": sum(self.confidence_scores) / max(1, len(self.confidence_scores))
+        }
+```
+
+## 🎯 CRITICAL SUCCESS FACTORS
+
+### LLM Integration Checklist
+- [ ] ✅ Prompt injection detection active
+- [ ] ✅ Output validation implemented
+- [ ] ✅ Safety keywords blocked
+- [ ] ✅ Caching strategy deployed
+- [ ] ✅ Token usage optimized
+- [ ] ✅ Confidence scoring active
+- [ ] ✅ Error handling comprehensive
+- [ ] ✅ Metrics collection enabled
+
+### Performance Targets
+- SQL generation success rate: **>90%**
+- Average response time: **<5 seconds**
+- Average confidence score: **>0.8**
+- Token efficiency: **<1000 tokens per query**
+
+Remember: **LLM outputs are NEVER trusted blindly.** Every generated SQL query and Python code must pass through multiple validation layers. The LLM is a powerful tool, but security and accuracy depend on rigorous validation, not the model's inherent safety.

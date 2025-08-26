@@ -1,0 +1,551 @@
+---
+globs: app/**/*.py
+description: SOLID principles implementation guidelines for maintainable code
+---
+
+# DataGenie SOLID Principles Rules
+
+## 🎯 SOLID PRINCIPLES MASTERY
+
+### FUNDAMENTAL CONTEXT
+You are implementing the **SOLID principles** in DataGenie to create maintainable, extensible, and testable code. Every class and function must adhere to these principles **WITHOUT EXCEPTION**.
+
+## 1️⃣ SINGLE RESPONSIBILITY PRINCIPLE (SRP)
+
+### ✅ REQUIRED: One Reason to Change
+```python
+# ✅ EXCELLENT: Each class has ONE responsibility
+
+class QuestionValidator:
+    """SINGLE RESPONSIBILITY: Validate user questions only."""
+    
+    def validate(self, question: str) -> ValidationResult:
+        """Only validates questions - nothing else."""
+        if not question.strip():
+            return ValidationResult(valid=False, error="Question cannot be empty")
+        
+        if len(question) > 1000:
+            return ValidationResult(valid=False, error="Question too long")
+        
+        if self._contains_sql_injection(question):
+            return ValidationResult(valid=False, error="Unsafe content detected")
+        
+        return ValidationResult(valid=True)
+    
+    def _contains_sql_injection(self, text: str) -> bool:
+        """Private helper - still part of validation responsibility."""
+        dangerous_patterns = ['DROP', 'DELETE', 'INSERT', '--', ';']
+        return any(pattern in text.upper() for pattern in dangerous_patterns)
+
+class SQLGenerator:
+    """SINGLE RESPONSIBILITY: Generate SQL queries only."""
+    
+    def __init__(self, llm_client: LLMClient):
+        self._llm_client = llm_client
+    
+    def generate_sql(self, question: str, schema: DatabaseSchema) -> str:
+        """Only generates SQL - doesn't validate, execute, or format."""
+        prompt = self._build_prompt(question, schema)
+        response = self._llm_client.generate(prompt)
+        return self._extract_sql(response)
+
+class QueryExecutor:
+    """SINGLE RESPONSIBILITY: Execute database queries only."""
+    
+    def __init__(self, connection_manager: ConnectionManager):
+        self._connection_manager = connection_manager
+    
+    async def execute(self, sql: str, connection_id: str) -> QueryResult:
+        """Only executes queries - doesn't generate or validate."""
+        connection = await self._connection_manager.get_connection(connection_id)
+        result = await connection.execute(sql)
+        return QueryResult(data=result.fetchall(), columns=result.keys())
+```
+
+### 🚫 SRP VIOLATIONS (FORBIDDEN)
+```python
+# 🚫 BAD: Multiple responsibilities in one class
+class AnalysisService:
+    def analyze_question(self, question):
+        # Responsibility 1: Validation
+        if not question:
+            raise ValueError("Invalid question")
+        
+        # Responsibility 2: SQL Generation  
+        sql = self.generate_sql(question)
+        
+        # Responsibility 3: Database Execution
+        result = self.execute_query(sql)
+        
+        # Responsibility 4: Visualization
+        chart = self.create_chart(result)
+        
+        # Responsibility 5: Notification
+        self.send_notification(result)
+        
+        return result  # TOO MANY RESPONSIBILITIES!
+```
+
+## 2️⃣ OPEN-CLOSED PRINCIPLE (OCP)
+
+### ✅ REQUIRED: Open for Extension, Closed for Modification
+```python
+# ✅ EXCELLENT: Extensible analysis engine without modification
+
+from abc import ABC, abstractmethod
+from typing import Protocol
+
+class AnalysisEngine(ABC):
+    """Base class - CLOSED for modification."""
+    
+    @abstractmethod
+    async def analyze(self, question: str, context: AnalysisContext) -> AnalysisResult:
+        """Template method - concrete implementations extend this."""
+        pass
+    
+    def preprocess_question(self, question: str) -> str:
+        """Common preprocessing - available to all implementations."""
+        return question.strip().lower()
+
+# ✅ EXTENSION: Database analysis (NO modification of base class)
+class DatabaseAnalysisEngine(AnalysisEngine):
+    """OPEN for extension - adds database-specific analysis."""
+    
+    def __init__(self, sql_generator: SQLGenerator):
+        self._sql_generator = sql_generator
+    
+    async def analyze(self, question: str, context: AnalysisContext) -> AnalysisResult:
+        """Extends base behavior without modifying it."""
+        preprocessed = self.preprocess_question(question)
+        
+        sql = await self._sql_generator.generate(preprocessed, context.schema)
+        return AnalysisResult(
+            type="database",
+            query=sql,
+            confidence=0.9
+        )
+
+# ✅ EXTENSION: Excel analysis (NO modification of base class)
+class ExcelAnalysisEngine(AnalysisEngine):
+    """OPEN for extension - adds Excel-specific analysis."""
+    
+    def __init__(self, code_generator: PythonCodeGenerator):
+        self._code_generator = code_generator
+    
+    async def analyze(self, question: str, context: AnalysisContext) -> AnalysisResult:
+        """Extends base behavior without modifying it."""
+        preprocessed = self.preprocess_question(question)
+        
+        python_code = await self._code_generator.generate(preprocessed, context.dataframe_info)
+        return AnalysisResult(
+            type="excel",
+            code=python_code,
+            confidence=0.85
+        )
+
+# ✅ FACTORY: Choose engine without modifying existing code
+class AnalysisEngineFactory:
+    """Factory creates engines - OPEN for new engine types."""
+    
+    @staticmethod
+    def create_engine(analysis_type: str) -> AnalysisEngine:
+        """Add new engines here without modifying existing ones."""
+        engines = {
+            "database": DatabaseAnalysisEngine,
+            "excel": ExcelAnalysisEngine,
+            # Easy to add new types: "ml": MLAnalysisEngine,
+        }
+        
+        engine_class = engines.get(analysis_type)
+        if not engine_class:
+            raise ValueError(f"Unknown analysis type: {analysis_type}")
+        
+        return engine_class()
+```
+
+### 🚫 OCP VIOLATIONS (FORBIDDEN)
+```python
+# 🚫 BAD: Modifying existing code for new functionality
+class AnalysisEngine:
+    def analyze(self, question: str, analysis_type: str):
+        if analysis_type == "database":
+            return self._analyze_database(question)
+        elif analysis_type == "excel":
+            return self._analyze_excel(question)
+        elif analysis_type == "ml":  # BAD: Modified existing method!
+            return self._analyze_ml(question)  # VIOLATION!
+```
+
+## 3️⃣ LISKOV SUBSTITUTION PRINCIPLE (LSP)
+
+### ✅ REQUIRED: Subtypes Must Be Substitutable
+```python
+# ✅ EXCELLENT: All implementations behave consistently
+
+class DataConnection(ABC):
+    """Base class defines behavioral contract."""
+    
+    @abstractmethod
+    async def execute_query(self, query: str) -> QueryResult:
+        """
+        CONTRACT:
+        - Must return QueryResult with data and metadata
+        - Must raise ConnectionError if connection fails
+        - Must raise SecurityError if query is unsafe
+        - Must complete within 30 seconds or raise TimeoutError
+        """
+        pass
+    
+    @abstractmethod
+    def get_schema(self) -> DatabaseSchema:
+        """
+        CONTRACT:
+        - Must return complete schema information
+        - Must include table names, column names, and types
+        - Must be consistent across multiple calls
+        """
+        pass
+
+# ✅ SUBSTITUTABLE: PostgreSQL implementation honors contract
+class PostgreSQLConnection(DataConnection):
+    """Honors ALL parent class contracts."""
+    
+    async def execute_query(self, query: str) -> QueryResult:
+        """Implements contract exactly as specified."""
+        try:
+            # Honors timeout contract
+            async with asyncio.timeout(30):
+                result = await self._pg_client.execute(query)
+                
+            # Honors return type contract
+            return QueryResult(
+                data=result.rows,
+                columns=[col.name for col in result.columns],
+                row_count=len(result.rows)
+            )
+            
+        except asyncio.TimeoutError:
+            raise TimeoutError("Query execution exceeded 30 seconds")  # Honors contract
+        except ConnectionRefusedError:
+            raise ConnectionError("Database connection failed")  # Honors contract
+    
+    def get_schema(self) -> DatabaseSchema:
+        """Returns consistent schema information."""
+        return self._cached_schema or self._fetch_schema()
+
+# ✅ SUBSTITUTABLE: MySQL implementation honors same contract
+class MySQLConnection(DataConnection):
+    """Also honors ALL parent class contracts."""
+    
+    async def execute_query(self, query: str) -> QueryResult:
+        """Different implementation, SAME behavior contract."""
+        try:
+            with timeout(30):  # Honors timeout contract
+                result = await self._mysql_client.query(query)
+            
+            # Honors return type contract (same format as PostgreSQL)
+            return QueryResult(
+                data=[dict(row) for row in result],
+                columns=list(result[0].keys()) if result else [],
+                row_count=len(result)
+            )
+            
+        except TimeoutError:
+            raise TimeoutError("Query execution exceeded 30 seconds")  # Same contract
+        except MySQLError:
+            raise ConnectionError("Database connection failed")  # Same contract
+
+# ✅ USAGE: Can substitute any implementation
+def analyze_data(connection: DataConnection, query: str) -> AnalysisResult:
+    """Works with ANY DataConnection implementation."""
+    schema = connection.get_schema()  # LSP: Works for PostgreSQL AND MySQL
+    result = await connection.execute_query(query)  # LSP: Same behavior guaranteed
+    
+    return AnalysisResult(result.data)
+```
+
+### 🚫 LSP VIOLATIONS (FORBIDDEN)
+```python
+# 🚫 BAD: Subclass changes behavioral contract
+class SQLiteConnection(DataConnection):
+    def execute_query(self, query: str) -> str:  # VIOLATION: Wrong return type!
+        return "SELECT results as string"  # VIOLATION: Different behavior!
+    
+    def get_schema(self) -> None:  # VIOLATION: Doesn't return schema!
+        print("Schema not supported")  # VIOLATION: Side effect!
+        return None
+
+# 🚫 BAD: Strengthening preconditions
+class StrictPostgreSQLConnection(DataConnection):
+    def execute_query(self, query: str) -> QueryResult:
+        if len(query) > 100:  # VIOLATION: Stronger precondition!
+            raise ValueError("Query too long")  # Parent allows longer queries!
+        
+        return super().execute_query(query)
+```
+
+## 4️⃣ INTERFACE SEGREGATION PRINCIPLE (ISP)
+
+### ✅ REQUIRED: Small, Focused Interfaces
+```python
+# ✅ EXCELLENT: Segregated interfaces by responsibility
+
+class IQuestionAnalyzer(Protocol):
+    """FOCUSED: Only question analysis methods."""
+    async def analyze_intent(self, question: str) -> Intent: ...
+    async def extract_entities(self, question: str) -> List[Entity]: ...
+
+class ISQLGenerator(Protocol):
+    """FOCUSED: Only SQL generation methods."""
+    async def generate_sql(self, intent: Intent, schema: Schema) -> str: ...
+    async def optimize_query(self, sql: str) -> str: ...
+
+class IQueryExecutor(Protocol):
+    """FOCUSED: Only query execution methods."""
+    async def execute(self, sql: str, connection_id: str) -> QueryResult: ...
+    async def explain_query(self, sql: str) -> ExecutionPlan: ...
+
+class IResultFormatter(Protocol):
+    """FOCUSED: Only result formatting methods."""
+    def format_tabular(self, result: QueryResult) -> DataFrame: ...
+    def format_json(self, result: QueryResult) -> Dict: ...
+
+# ✅ IMPLEMENTATION: Classes implement only what they need
+class DatabaseAnalysisService:
+    """Uses only the interfaces it needs."""
+    
+    def __init__(
+        self,
+        analyzer: IQuestionAnalyzer,      # Needs only analysis
+        sql_generator: ISQLGenerator,     # Needs only SQL generation
+        executor: IQueryExecutor         # Needs only execution
+        # Note: Doesn't need IResultFormatter - ISP respected!
+    ):
+        self._analyzer = analyzer
+        self._sql_generator = sql_generator
+        self._executor = executor
+    
+    async def analyze(self, question: str) -> QueryResult:
+        """Uses only the methods it actually needs."""
+        intent = await self._analyzer.analyze_intent(question)
+        sql = await self._sql_generator.generate_sql(intent, schema)
+        return await self._executor.execute(sql, connection_id)
+
+class ReportingService:
+    """Different service, different interface needs."""
+    
+    def __init__(
+        self,
+        executor: IQueryExecutor,         # Needs execution
+        formatter: IResultFormatter      # Needs formatting
+        # Note: Doesn't need IQuestionAnalyzer or ISQLGenerator - ISP respected!
+    ):
+        self._executor = executor
+        self._formatter = formatter
+    
+    async def generate_report(self, sql: str) -> DataFrame:
+        """Uses only the methods it actually needs."""
+        result = await self._executor.execute(sql, connection_id)
+        return self._formatter.format_tabular(result)
+```
+
+### 🚫 ISP VIOLATIONS (FORBIDDEN)
+```python
+# 🚫 BAD: Fat interface with too many responsibilities
+class IDataService(Protocol):
+    """VIOLATION: Too many unrelated methods."""
+    async def analyze_question(self, question: str): ...     # Analysis responsibility
+    async def generate_sql(self, intent: Intent): ...        # Generation responsibility
+    async def execute_query(self, sql: str): ...             # Execution responsibility
+    async def format_result(self, result: QueryResult): ...  # Formatting responsibility
+    async def send_email(self, email: str): ...              # Email responsibility
+    async def cache_result(self, key: str, data: Any): ...   # Caching responsibility
+    # Forces all implementations to provide ALL methods!
+
+class SimpleAnalyzer(IDataService):
+    """FORCED to implement methods it doesn't need."""
+    
+    async def analyze_question(self, question: str):
+        return analyze(question)  # Only needs this
+    
+    async def generate_sql(self, intent: Intent):
+        raise NotImplementedError("Don't need this!")  # VIOLATION: Forced to implement
+    
+    async def execute_query(self, sql: str):
+        raise NotImplementedError("Don't need this!")  # VIOLATION: Forced to implement
+    
+    # ... more unused methods
+```
+
+## 5️⃣ DEPENDENCY INVERSION PRINCIPLE (DIP)
+
+### ✅ REQUIRED: Depend on Abstractions, Not Concretions
+```python
+# ✅ EXCELLENT: High-level modules depend on abstractions
+
+from abc import ABC, abstractmethod
+
+# ✅ ABSTRACTION: High-level policy defines interface
+class IDataRepository(ABC):
+    """High-level module defines what it needs."""
+    
+    @abstractmethod
+    async def save_analysis(self, analysis: Analysis) -> str: ...
+    
+    @abstractmethod
+    async def find_by_user(self, user_id: str) -> List[Analysis]: ...
+
+class INotificationService(ABC):
+    """High-level module defines notification contract."""
+    
+    @abstractmethod
+    async def notify_completion(self, user_id: str, analysis_id: str): ...
+
+# ✅ HIGH-LEVEL MODULE: Depends only on abstractions
+class AnalysisOrchestrator:
+    """High-level policy - orchestrates analysis workflow."""
+    
+    def __init__(
+        self,
+        repository: IDataRepository,           # Abstraction, not concrete class
+        notification_service: INotificationService  # Abstraction, not concrete class
+    ):
+        self._repository = repository
+        self._notification_service = notification_service
+    
+    async def process_analysis(self, request: AnalysisRequest) -> str:
+        """High-level algorithm - stable business logic."""
+        
+        # 1. Create analysis
+        analysis = Analysis(
+            user_id=request.user_id,
+            question=request.question,
+            status="processing"
+        )
+        
+        # 2. Save to repository (abstraction)
+        analysis_id = await self._repository.save_analysis(analysis)
+        
+        # 3. Perform analysis logic (business rules)
+        result = await self._perform_analysis(request.question)
+        
+        # 4. Update analysis
+        analysis.status = "completed"
+        analysis.result = result
+        await self._repository.save_analysis(analysis)
+        
+        # 5. Notify user (abstraction)
+        await self._notification_service.notify_completion(
+            request.user_id, 
+            analysis_id
+        )
+        
+        return analysis_id
+
+# ✅ LOW-LEVEL MODULES: Implement abstractions
+class PostgreSQLRepository(IDataRepository):
+    """Concrete implementation - implements interface from high-level module."""
+    
+    def __init__(self, session: AsyncSession):
+        self._session = session
+    
+    async def save_analysis(self, analysis: Analysis) -> str:
+        """Implements interface defined by high-level module."""
+        db_model = AnalysisModel.from_domain(analysis)
+        self._session.add(db_model)
+        await self._session.commit()
+        return db_model.id
+    
+    async def find_by_user(self, user_id: str) -> List[Analysis]:
+        """Implements interface defined by high-level module."""
+        result = await self._session.execute(
+            select(AnalysisModel).where(AnalysisModel.user_id == user_id)
+        )
+        return [model.to_domain() for model in result.scalars()]
+
+class EmailNotificationService(INotificationService):
+    """Concrete implementation - implements interface from high-level module."""
+    
+    def __init__(self, email_client: EmailClient):
+        self._email_client = email_client
+    
+    async def notify_completion(self, user_id: str, analysis_id: str):
+        """Implements interface defined by high-level module."""
+        user = await self._get_user(user_id)
+        await self._email_client.send(
+            to=user.email,
+            subject="Analysis Complete",
+            body=f"Your analysis {analysis_id} is ready!"
+        )
+
+# ✅ DEPENDENCY INJECTION: Wire dependencies at composition root
+class DIContainer:
+    """Composition root - wires concrete implementations to abstractions."""
+    
+    def create_analysis_orchestrator(self) -> AnalysisOrchestrator:
+        """Inject concrete implementations into high-level module."""
+        
+        # Create low-level implementations
+        repository = PostgreSQLRepository(self._db_session)
+        notification_service = EmailNotificationService(self._email_client)
+        
+        # Inject into high-level module
+        return AnalysisOrchestrator(
+            repository=repository,              # Concrete → Abstract
+            notification_service=notification_service  # Concrete → Abstract
+        )
+```
+
+### 🚫 DIP VIOLATIONS (FORBIDDEN)
+```python
+# 🚫 BAD: High-level module depends on low-level modules
+from infrastructure.database.postgresql_repository import PostgreSQLRepository
+from infrastructure.email.smtp_service import SMTPEmailService
+
+class AnalysisOrchestrator:
+    """VIOLATION: Depends on concrete implementations."""
+    
+    def __init__(self):
+        # VIOLATION: High-level module creates low-level dependencies
+        self._repository = PostgreSQLRepository()  # Concrete dependency!
+        self._email_service = SMTPEmailService()   # Concrete dependency!
+    
+    async def process_analysis(self, request: AnalysisRequest):
+        # VIOLATION: Cannot test or change implementations
+        await self._repository.save(analysis)  # Tightly coupled!
+        await self._email_service.send_email(user_id)  # Tightly coupled!
+```
+
+## 📋 SOLID PRINCIPLES CHECKLIST
+
+### Single Responsibility Principle
+- [ ] ✅ Each class has exactly one reason to change
+- [ ] ✅ Each method has a single, well-defined purpose
+- [ ] ✅ Classes are focused on one business concern
+- [ ] ✅ No "god classes" with multiple responsibilities
+
+### Open-Closed Principle  
+- [ ] ✅ Classes are closed for modification
+- [ ] ✅ Classes are open for extension via inheritance/composition
+- [ ] ✅ New features added without changing existing code
+- [ ] ✅ Abstract base classes define extension points
+
+### Liskov Substitution Principle
+- [ ] ✅ Subtypes are substitutable for base types
+- [ ] ✅ Method signatures match exactly
+- [ ] ✅ Behavioral contracts are maintained
+- [ ] ✅ No strengthened preconditions or weakened postconditions
+
+### Interface Segregation Principle
+- [ ] ✅ Interfaces are small and focused
+- [ ] ✅ Clients depend only on methods they use
+- [ ] ✅ No "fat interfaces" with unrelated methods
+- [ ] ✅ Interface cohesion is high
+
+### Dependency Inversion Principle
+- [ ] ✅ High-level modules depend on abstractions
+- [ ] ✅ Low-level modules implement abstractions
+- [ ] ✅ Dependencies injected at composition root
+- [ ] ✅ No concrete dependencies in business logic
+
+Remember: **SOLID principles are not optional guidelines - they are MANDATORY requirements.** Every violation makes the codebase harder to maintain, test, and extend. Design for change from the beginning.

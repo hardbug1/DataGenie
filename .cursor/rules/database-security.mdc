@@ -1,0 +1,326 @@
+---
+globs: app/models/*.py,app/core/query/*.py,scripts/*.py
+description: Database security and data protection standards
+---
+
+# DataGenie Database Security & Data Protection Rules
+
+## 🛡️ CRITICAL SECURITY IMPERATIVES
+
+### SECURITY CONTEXT
+You are handling **SENSITIVE BUSINESS DATA** through DataGenie's multi-database analysis platform. Every database operation must be **BULLETPROOF** against security threats.
+
+## ⚡ ABSOLUTE SECURITY REQUIREMENTS
+
+### 1. SQL INJECTION PREVENTION (MANDATORY)
+```python
+# ✅ REQUIRED: Always use parameterized queries
+async def execute_safe_query(query: str, params: Dict[str, Any]):
+    """ONLY acceptable way to execute user-influenced queries."""
+    async with engine.begin() as conn:
+        result = await conn.execute(text(query), params)
+        return result.fetchall()
+
+# ✅ REQUIRED: SQLAlchemy ORM usage
+users = await session.execute(
+    select(User).where(User.email == email)  # Safe parameterization
+)
+
+# 🚫 NEVER: String concatenation/formatting
+query = f"SELECT * FROM users WHERE email = '{email}'"  # FORBIDDEN
+query = "SELECT * FROM users WHERE email = " + email     # FORBIDDEN
+query = "SELECT * FROM users WHERE email = %s" % email   # FORBIDDEN
+```
+
+### 2. READ-ONLY DATABASE ACCESS (NON-NEGOTIABLE)
+```python
+# ✅ REQUIRED: Validate all external database queries
+FORBIDDEN_SQL_PATTERNS = [
+    r'\b(INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|TRUNCATE|REPLACE)\b',
+    r'\b(EXEC|EXECUTE|CALL)\b',
+    r';\s*(INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|TRUNCATE)',
+    r'--',  # SQL comments
+    r'/\*.*\*/',  # Multi-line comments
+]
+
+def validate_sql_safety(sql: str) -> bool:
+    """MANDATORY validation before executing any user-generated SQL."""
+    sql_upper = sql.upper()
+    for pattern in FORBIDDEN_SQL_PATTERNS:
+        if re.search(pattern, sql_upper, re.IGNORECASE):
+            raise SecurityError(f"Forbidden SQL operation detected: {pattern}")
+    return True
+
+# ✅ REQUIRED: Connection string validation
+def create_readonly_connection(config: dict) -> Engine:
+    """ONLY create read-only connections to external databases."""
+    if 'readonly' not in config.get('username', '').lower():
+        logger.warning("Database user should be read-only", extra=config)
+    
+    return create_engine(
+        connection_url,
+        pool_pre_ping=True,
+        pool_recycle=3600,
+        echo=False,  # Never log queries in production
+        isolation_level="READ_UNCOMMITTED"  # Read-only transaction level
+    )
+```
+
+### 3. PERSONAL DATA PROTECTION (LEGALLY REQUIRED)
+```python
+# ✅ MANDATORY: Automatic PII detection and masking
+PII_PATTERNS = {
+    'email': r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b',
+    'phone': r'\b\d{3}[-.]?\d{3}[-.]?\d{4}\b',
+    'ssn': r'\b\d{3}-\d{2}-\d{4}\b',
+    'credit_card': r'\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b',
+    'korean_rrn': r'\b\d{6}-\d{7}\b',  # Korean Resident Registration Number
+}
+
+def mask_personal_data(data: Any) -> Any:
+    """REQUIRED: Apply to ALL query results before returning to user."""
+    if isinstance(data, str):
+        for pii_type, pattern in PII_PATTERNS.items():
+            if re.search(pattern, data):
+                data = re.sub(pattern, lambda m: mask_string(m.group(), pii_type), data)
+    elif isinstance(data, dict):
+        return {k: mask_personal_data(v) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [mask_personal_data(item) for item in data]
+    return data
+
+def mask_string(value: str, pii_type: str) -> str:
+    """REQUIRED: Specific masking rules by data type."""
+    if pii_type == 'email':
+        name, domain = value.split('@')
+        return f"{name[:2]}***@{domain}"
+    elif pii_type == 'phone':
+        return f"{value[:3]}***{value[-4:]}"
+    elif pii_type == 'credit_card':
+        return f"****-****-****-{value[-4:]}"
+    else:
+        return '***MASKED***'
+```
+
+## 🚫 ABSOLUTE PROHIBITIONS
+
+### 1. NEVER ALLOW THESE OPERATIONS
+```python
+# 🚫 FORBIDDEN: Any data modification
+NEVER_ALLOW = [
+    "INSERT", "UPDATE", "DELETE", "DROP", "CREATE", "ALTER", 
+    "TRUNCATE", "REPLACE", "MERGE", "EXEC", "EXECUTE",
+    "CALL", "GRANT", "REVOKE", "COMMIT", "ROLLBACK"
+]
+
+# 🚫 FORBIDDEN: Dynamic query construction
+def unsafe_query(user_input):
+    return f"SELECT * FROM {user_input}"  # NEVER DO THIS
+
+# 🚫 FORBIDDEN: Exposing raw errors
+try:
+    result = execute_query(sql)
+except Exception as e:
+    return str(e)  # NEVER expose database errors to users
+
+# 🚫 FORBIDDEN: Logging sensitive data
+logger.info(f"User password: {password}")  # NEVER LOG CREDENTIALS
+logger.info(f"Query result: {personal_data}")  # NEVER LOG PII
+```
+
+### 2. CONNECTION SECURITY VIOLATIONS
+```python
+# 🚫 NEVER: Store credentials in code
+DATABASE_PASSWORD = "hardcoded_password"  # FORBIDDEN
+
+# 🚫 NEVER: Use privileged accounts
+config = {
+    "username": "admin",  # FORBIDDEN
+    "username": "root",   # FORBIDDEN
+    "username": "sa",     # FORBIDDEN
+}
+
+# 🚫 NEVER: Skip SSL/TLS
+engine = create_engine("postgresql://user:pass@host/db")  # INSECURE
+
+# ✅ REQUIRED: Always use secure connections
+engine = create_engine(
+    "postgresql://readonly_user:pass@host/db?sslmode=require"
+)
+```
+
+## 🔐 ENCRYPTION & SECRETS MANAGEMENT
+
+### Environment Variables (MANDATORY)
+```python
+# ✅ REQUIRED: All sensitive data in environment variables
+DATABASE_CONNECTIONS = {
+    "main_db": {
+        "host": os.getenv("DB_HOST"),
+        "port": int(os.getenv("DB_PORT", 5432)),
+        "database": os.getenv("DB_NAME"),
+        "username": os.getenv("DB_USER"),
+        "password": os.getenv("DB_PASSWORD"),  # NEVER hardcode
+        "ssl_mode": os.getenv("DB_SSL_MODE", "require"),
+    }
+}
+
+# ✅ REQUIRED: Encrypt stored connection configurations
+class EncryptedConnectionConfig:
+    """MANDATORY for storing external database credentials."""
+    
+    def __init__(self):
+        self.cipher = Fernet(os.getenv("ENCRYPTION_KEY"))
+    
+    def encrypt_config(self, config: dict) -> str:
+        """Encrypt database connection configuration."""
+        json_str = json.dumps(config)
+        encrypted = self.cipher.encrypt(json_str.encode())
+        return base64.b64encode(encrypted).decode()
+    
+    def decrypt_config(self, encrypted_config: str) -> dict:
+        """Decrypt database connection configuration."""
+        encrypted = base64.b64decode(encrypted_config.encode())
+        decrypted = self.cipher.decrypt(encrypted)
+        return json.loads(decrypted.decode())
+```
+
+## 📊 QUERY EXECUTION SAFETY
+
+### Safe Query Execution Pattern
+```python
+# ✅ REQUIRED: Always use this pattern for external database queries
+async def execute_external_query(
+    sql: str, 
+    connection_id: str, 
+    user: User,
+    timeout: int = 30
+) -> Dict[str, Any]:
+    """
+    MANDATORY pattern for all external database operations.
+    
+    Security features:
+    - SQL injection prevention
+    - Read-only validation
+    - Personal data masking
+    - Query timeout
+    - Audit logging
+    """
+    
+    # 1. REQUIRED: Validate user permissions
+    if not user.can_access_connection(connection_id):
+        raise PermissionError("User cannot access this database")
+    
+    # 2. REQUIRED: Validate SQL safety
+    validate_sql_safety(sql)
+    
+    # 3. REQUIRED: Log the attempt (without sensitive data)
+    audit_log.info(
+        "External query execution",
+        extra={
+            "user_id": user.id,
+            "connection_id": connection_id,
+            "query_hash": hashlib.sha256(sql.encode()).hexdigest()[:16],
+            "timestamp": datetime.utcnow()
+        }
+    )
+    
+    try:
+        # 4. REQUIRED: Execute with timeout
+        async with asyncio.timeout(timeout):
+            connection = get_external_connection(connection_id)
+            result = await connection.execute(text(sql))
+            raw_data = result.fetchall()
+        
+        # 5. REQUIRED: Mask personal data
+        masked_data = mask_personal_data(raw_data)
+        
+        # 6. REQUIRED: Limit result size
+        if len(masked_data) > MAX_RESULT_ROWS:
+            masked_data = masked_data[:MAX_RESULT_ROWS]
+            
+        return {
+            "data": masked_data,
+            "row_count": len(masked_data),
+            "execution_time": execution_time,
+            "truncated": len(raw_data) > MAX_RESULT_ROWS
+        }
+        
+    except asyncio.TimeoutError:
+        raise QueryTimeoutError("Query execution exceeded time limit")
+    except Exception as e:
+        # 7. REQUIRED: Log error without exposing details
+        logger.error(
+            "Query execution failed",
+            extra={
+                "user_id": user.id,
+                "connection_id": connection_id,
+                "error_type": type(e).__name__
+            }
+        )
+        raise QueryExecutionError("Database query failed")
+```
+
+## 🔍 AUDIT & MONITORING
+
+### Required Security Logging
+```python
+# ✅ MANDATORY: Security event logging
+class SecurityAuditLogger:
+    """REQUIRED for all security-related events."""
+    
+    @staticmethod
+    def log_query_execution(user_id: str, connection_id: str, sql_hash: str):
+        security_logger.info(
+            "Database query executed",
+            extra={
+                "event_type": "query_execution",
+                "user_id": user_id,
+                "connection_id": connection_id,
+                "sql_hash": sql_hash,
+                "timestamp": datetime.utcnow(),
+                "ip_address": get_client_ip()
+            }
+        )
+    
+    @staticmethod
+    def log_access_violation(user_id: str, resource: str, action: str):
+        security_logger.warning(
+            "Access violation detected",
+            extra={
+                "event_type": "access_violation",
+                "user_id": user_id,
+                "resource": resource,
+                "action": action,
+                "timestamp": datetime.utcnow(),
+                "ip_address": get_client_ip()
+            }
+        )
+```
+
+## 🎯 SECURITY CHECKLIST
+
+### Before Every Database Operation
+- [ ] ✅ User authentication verified
+- [ ] ✅ User permissions validated  
+- [ ] ✅ SQL injection check passed
+- [ ] ✅ Read-only validation confirmed
+- [ ] ✅ Query timeout configured
+- [ ] ✅ Result masking applied
+- [ ] ✅ Audit log recorded
+
+### Database Connection Security
+- [ ] ✅ Credentials encrypted in storage
+- [ ] ✅ SSL/TLS connection enforced
+- [ ] ✅ Read-only database user
+- [ ] ✅ Connection pooling configured
+- [ ] ✅ Network access restricted
+
+### Data Protection Compliance
+- [ ] ✅ Personal data detection active
+- [ ] ✅ Automatic masking applied
+- [ ] ✅ Data retention policies enforced
+- [ ] ✅ Access logging comprehensive
+- [ ] ✅ GDPR compliance verified
+
+Remember: **ONE SECURITY BREACH CAN DESTROY THE ENTIRE PROJECT.** Every database operation must be treated as a potential attack vector. Security is not optional - it's the foundation of everything we build.

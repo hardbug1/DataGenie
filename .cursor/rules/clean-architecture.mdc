@@ -1,0 +1,410 @@
+---
+alwaysApply: true
+description: Clean Architecture principles and layer separation for DataGenie
+---
+
+# DataGenie Clean Architecture Rules
+
+## 🏛️ CLEAN ARCHITECTURE IMPERATIVES
+
+### ARCHITECTURAL CONTEXT
+You are implementing **Clean Architecture** in DataGenie to ensure maintainable, testable, and scalable code. Every component must respect the **Dependency Rule**: dependencies point inward toward business logic.
+
+## 📐 MANDATORY LAYER STRUCTURE
+
+### 1. DIRECTORY ORGANIZATION (NON-NEGOTIABLE)
+```
+app/
+├── domain/                 # Enterprise Business Rules (innermost)
+│   ├── entities/          # Core business entities
+│   ├── value_objects/     # Immutable value objects
+│   └── interfaces/        # Domain service interfaces
+├── use_cases/             # Application Business Rules
+│   ├── analysis/          # Analysis use cases
+│   ├── auth/              # Authentication use cases
+│   └── data_management/   # Data management use cases
+├── adapters/              # Interface Adapters
+│   ├── repositories/      # Data access implementations
+│   ├── external_services/ # External API adapters
+│   └── presenters/        # Output formatters
+├── infrastructure/        # Frameworks & Drivers (outermost)
+│   ├── database/          # Database implementations
+│   ├── web/               # FastAPI controllers
+│   ├── cache/             # Redis implementations
+│   └── external_apis/     # LLM, external DB clients
+└── main.py               # Composition root
+```
+
+## ⚡ DEPENDENCY RULE ENFORCEMENT
+
+### 1. DOMAIN LAYER (CORE - ZERO DEPENDENCIES)
+```python
+# ✅ REQUIRED: Pure business logic with NO external dependencies
+from abc import ABC, abstractmethod
+from typing import Protocol, List, Optional
+from dataclasses import dataclass
+from datetime import datetime
+
+# Domain Entity Example
+@dataclass(frozen=True)
+class DataAnalysisQuery:
+    """Core business entity - represents a data analysis request."""
+    id: str
+    question: str
+    user_id: str
+    created_at: datetime
+    query_type: str
+    status: str
+    
+    def is_valid(self) -> bool:
+        """Pure business logic - no dependencies."""
+        return (
+            len(self.question.strip()) > 0 and
+            self.query_type in ['database', 'excel', 'general'] and
+            self.status in ['pending', 'processing', 'completed', 'failed']
+        )
+    
+    def can_be_executed_by(self, user_id: str) -> bool:
+        """Business rule - who can execute this query."""
+        return self.user_id == user_id
+
+# Domain Service Interface (Protocol)
+class IAnalysisEngine(Protocol):
+    """Domain interface - defines what we need, not how."""
+    
+    async def analyze_question(self, question: str) -> 'QuestionAnalysis':
+        """Analyze natural language question."""
+        ...
+    
+    async def generate_query(self, analysis: 'QuestionAnalysis') -> str:
+        """Generate appropriate query (SQL/Python)."""
+        ...
+
+# 🚫 FORBIDDEN in Domain Layer
+import fastapi  # NEVER import frameworks
+import sqlalchemy  # NEVER import ORMs  
+import redis  # NEVER import infrastructure
+```
+
+### 2. USE CASES LAYER (APPLICATION LOGIC)
+```python
+# ✅ REQUIRED: Use case implementation with dependency injection
+from domain.entities.analysis_query import DataAnalysisQuery
+from domain.interfaces.repositories import IQueryRepository
+from domain.interfaces.services import IAnalysisEngine
+
+class ExecuteAnalysisUseCase:
+    """Application business rule - orchestrates domain logic."""
+    
+    def __init__(
+        self,
+        query_repository: IQueryRepository,
+        analysis_engine: IAnalysisEngine,
+        user_permissions: IUserPermissions
+    ):
+        # ✅ REQUIRED: Depend on abstractions, not concretions
+        self._query_repository = query_repository
+        self._analysis_engine = analysis_engine
+        self._user_permissions = user_permissions
+    
+    async def execute(self, request: AnalysisRequest) -> AnalysisResult:
+        """
+        SINGLE RESPONSIBILITY: Execute one analysis request.
+        
+        Business flow:
+        1. Validate user permissions
+        2. Create domain entity
+        3. Perform analysis
+        4. Store results
+        5. Return formatted result
+        """
+        
+        # 1. Business rule validation
+        if not await self._user_permissions.can_execute_analysis(request.user_id):
+            raise PermissionDeniedError("User cannot execute analysis")
+        
+        # 2. Create domain entity
+        query = DataAnalysisQuery(
+            id=generate_id(),
+            question=request.question,
+            user_id=request.user_id,
+            created_at=datetime.utcnow(),
+            query_type=request.query_type,
+            status='pending'
+        )
+        
+        # 3. Validate business rules
+        if not query.is_valid():
+            raise InvalidQueryError("Query does not meet business requirements")
+        
+        # 4. Execute analysis (delegate to domain service)
+        analysis = await self._analysis_engine.analyze_question(query.question)
+        generated_query = await self._analysis_engine.generate_query(analysis)
+        
+        # 5. Store result (delegate to repository)
+        await self._query_repository.save(query)
+        
+        return AnalysisResult(
+            query_id=query.id,
+            analysis=analysis,
+            generated_query=generated_query
+        )
+
+# 🚫 FORBIDDEN in Use Cases
+from infrastructure.database.models import SQLModel  # NEVER import infrastructure
+```
+
+### 3. ADAPTERS LAYER (INTERFACE ADAPTERS)
+```python
+# ✅ REQUIRED: Repository implementation (infrastructure details)
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, insert
+from domain.entities.analysis_query import DataAnalysisQuery
+from domain.interfaces.repositories import IQueryRepository
+
+class SqlAlchemyQueryRepository(IQueryRepository):
+    """Adapter that implements domain interface using SQLAlchemy."""
+    
+    def __init__(self, session: AsyncSession):
+        self._session = session
+    
+    async def save(self, query: DataAnalysisQuery) -> None:
+        """Convert domain entity to infrastructure format."""
+        # ✅ REQUIRED: Transform domain entity to database model
+        db_model = QueryModel(
+            id=query.id,
+            question=query.question,
+            user_id=query.user_id,
+            created_at=query.created_at,
+            query_type=query.query_type,
+            status=query.status
+        )
+        self._session.add(db_model)
+        await self._session.commit()
+    
+    async def find_by_id(self, query_id: str) -> Optional[DataAnalysisQuery]:
+        """Convert database model back to domain entity."""
+        result = await self._session.execute(
+            select(QueryModel).where(QueryModel.id == query_id)
+        )
+        db_model = result.scalar_one_or_none()
+        
+        if not db_model:
+            return None
+        
+        # ✅ REQUIRED: Transform database model to domain entity
+        return DataAnalysisQuery(
+            id=db_model.id,
+            question=db_model.question,
+            user_id=db_model.user_id,
+            created_at=db_model.created_at,
+            query_type=db_model.query_type,
+            status=db_model.status
+        )
+
+# ✅ REQUIRED: External service adapter
+class OpenAIAnalysisEngine(IAnalysisEngine):
+    """Adapter for OpenAI LLM service."""
+    
+    def __init__(self, openai_client: OpenAIClient):
+        self._client = openai_client
+    
+    async def analyze_question(self, question: str) -> QuestionAnalysis:
+        """Implement domain interface using external service."""
+        # Transform domain request to external API format
+        llm_response = await self._client.generate_analysis(question)
+        
+        # Transform external response to domain format
+        return QuestionAnalysis(
+            intent=llm_response.intent,
+            entities=llm_response.entities,
+            confidence=llm_response.confidence,
+            query_type=llm_response.query_type
+        )
+```
+
+### 4. INFRASTRUCTURE LAYER (FRAMEWORKS & DRIVERS)
+```python
+# ✅ REQUIRED: Framework-specific implementations
+from fastapi import APIRouter, Depends, HTTPException
+from use_cases.analysis.execute_analysis import ExecuteAnalysisUseCase
+
+router = APIRouter()
+
+# ✅ REQUIRED: Dependency injection at the edge
+async def get_execute_analysis_use_case() -> ExecuteAnalysisUseCase:
+    """Composition root - wire up dependencies."""
+    return ExecuteAnalysisUseCase(
+        query_repository=get_query_repository(),
+        analysis_engine=get_analysis_engine(),
+        user_permissions=get_user_permissions()
+    )
+
+@router.post("/analysis/execute")
+async def execute_analysis_endpoint(
+    request: AnalysisRequestDTO,
+    use_case: ExecuteAnalysisUseCase = Depends(get_execute_analysis_use_case)
+):
+    """
+    Web controller - thin adapter to use case.
+    
+    Responsibilities:
+    1. HTTP request/response handling
+    2. DTO validation
+    3. Exception to HTTP status mapping
+    4. Delegation to use case
+    """
+    try:
+        # Convert DTO to use case request
+        use_case_request = AnalysisRequest(
+            question=request.question,
+            user_id=request.user_id,
+            query_type=request.query_type
+        )
+        
+        # Execute use case
+        result = await use_case.execute(use_case_request)
+        
+        # Convert result to HTTP response
+        return AnalysisResponseDTO(
+            success=True,
+            data=result,
+            message="Analysis completed successfully"
+        )
+        
+    except PermissionDeniedError as e:
+        raise HTTPException(status_code=403, detail=str(e))
+    except InvalidQueryError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Analysis execution failed: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+```
+
+## 🚫 ARCHITECTURE VIOLATIONS (FORBIDDEN)
+
+### 1. DEPENDENCY RULE VIOLATIONS
+```python
+# 🚫 NEVER: Domain depending on infrastructure
+from sqlalchemy import Column, Integer  # Domain layer importing ORM
+from fastapi import HTTPException      # Domain layer importing web framework
+
+class User:  # Domain entity
+    def save(self):
+        session.add(self)  # FORBIDDEN: Domain knows about persistence
+
+# 🚫 NEVER: Use cases depending on frameworks
+class ExecuteAnalysisUseCase:
+    def execute(self, request: Request):  # FORBIDDEN: Use case knows about HTTP
+        if not request.headers.get('auth'):  # FORBIDDEN: Business logic knows HTTP
+            raise HTTPException(401)  # FORBIDDEN: Use case knows web framework
+
+# 🚫 NEVER: Skipping layers
+@router.post("/analysis")
+async def analysis_endpoint():
+    query = session.query(QueryModel).first()  # FORBIDDEN: Controller accessing DB directly
+    result = openai_client.analyze(query.text)  # FORBIDDEN: Controller accessing external API
+```
+
+### 2. SINGLE RESPONSIBILITY VIOLATIONS
+```python
+# 🚫 NEVER: Multiple responsibilities in one class
+class AnalysisService:
+    def analyze_question(self, question):     # Responsibility 1: Analysis
+        pass
+    
+    def save_to_database(self, result):       # Responsibility 2: Persistence
+        pass
+    
+    def send_notification(self, user_id):     # Responsibility 3: Notification
+        pass
+    
+    def format_response(self, data):          # Responsibility 4: Presentation
+        pass
+
+# ✅ REQUIRED: Separate responsibilities
+class QuestionAnalyzer:
+    def analyze(self, question): pass
+
+class AnalysisRepository:
+    def save(self, result): pass
+
+class NotificationService:
+    def notify(self, user_id): pass
+
+class ResponseFormatter:
+    def format(self, data): pass
+```
+
+## 🏗️ COMPOSITION ROOT PATTERN
+
+### Dependency Injection Container
+```python
+# ✅ REQUIRED: Wire dependencies at application startup
+class DIContainer:
+    """Composition root - single place where all dependencies are wired."""
+    
+    def __init__(self):
+        # Infrastructure layer
+        self._db_session = self._create_db_session()
+        self._redis_client = self._create_redis_client()
+        self._openai_client = self._create_openai_client()
+        
+        # Adapter layer
+        self._query_repository = SqlAlchemyQueryRepository(self._db_session)
+        self._analysis_engine = OpenAIAnalysisEngine(self._openai_client)
+        self._user_permissions = RedisUserPermissions(self._redis_client)
+        
+        # Use case layer
+        self._execute_analysis_use_case = ExecuteAnalysisUseCase(
+            self._query_repository,
+            self._analysis_engine,
+            self._user_permissions
+        )
+    
+    def get_execute_analysis_use_case(self) -> ExecuteAnalysisUseCase:
+        return self._execute_analysis_use_case
+    
+    def _create_db_session(self) -> AsyncSession:
+        """Create database session - infrastructure detail."""
+        return async_session_factory()
+    
+    def _create_redis_client(self) -> RedisClient:
+        """Create Redis client - infrastructure detail."""
+        return RedisClient(url=settings.redis_url)
+    
+    def _create_openai_client(self) -> OpenAIClient:
+        """Create OpenAI client - infrastructure detail."""
+        return OpenAIClient(api_key=settings.openai_api_key)
+
+# ✅ REQUIRED: Use container in main application
+container = DIContainer()
+
+def get_execute_analysis_use_case():
+    return container.get_execute_analysis_use_case()
+```
+
+## 📋 CLEAN ARCHITECTURE CHECKLIST
+
+### Layer Validation
+- [ ] ✅ Domain layer has NO external dependencies
+- [ ] ✅ Use cases depend only on domain interfaces
+- [ ] ✅ Adapters implement domain interfaces
+- [ ] ✅ Infrastructure depends on adapters
+- [ ] ✅ Dependencies point inward only
+
+### Responsibility Separation
+- [ ] ✅ Each class has single responsibility
+- [ ] ✅ Business logic isolated in domain/use cases
+- [ ] ✅ Framework details isolated in infrastructure
+- [ ] ✅ Data transformation isolated in adapters
+- [ ] ✅ Composition handled in single location
+
+### Interface Design
+- [ ] ✅ Domain defines interfaces it needs
+- [ ] ✅ Adapters implement domain interfaces
+- [ ] ✅ Use cases depend on abstractions
+- [ ] ✅ Infrastructure implements adapters
+- [ ] ✅ No circular dependencies
+
+Remember: **Clean Architecture is about INDEPENDENCE.** Business logic should not depend on frameworks, databases, or external services. The architecture should allow changing any external dependency without affecting core business rules.

@@ -1,0 +1,578 @@
+---
+globs: tests/**/*.py,app/**/*.py
+description: Test-Driven Development (TDD) practices and testing standards
+---
+
+# DataGenie Test-Driven Development (TDD) Rules
+
+## 🧪 TDD EXCELLENCE IMPERATIVES
+
+### TDD CONTEXT
+You are implementing **Test-Driven Development** for DataGenie. **EVERY** line of production code must be preceded by a failing test. No exceptions. TDD is not optional - it's the **MANDATORY** development process.
+
+## ⚡ RED-GREEN-REFACTOR CYCLE (ABSOLUTE REQUIREMENT)
+
+### 1. RED PHASE: Write Failing Test First
+```python
+# ✅ REQUIRED: ALWAYS start with a failing test
+
+import pytest
+from unittest.mock import Mock, AsyncMock
+from domain.entities.analysis_query import DataAnalysisQuery
+from domain.exceptions import InvalidQueryError
+
+class TestDataAnalysisQuery:
+    """Test class BEFORE implementing DataAnalysisQuery."""
+    
+    def test_valid_query_creation(self):
+        """RED: This test MUST fail initially."""
+        # Arrange
+        query_data = {
+            "id": "query-123",
+            "question": "Show me sales data",
+            "user_id": "user-456", 
+            "created_at": datetime.utcnow(),
+            "query_type": "database",
+            "status": "pending"
+        }
+        
+        # Act
+        query = DataAnalysisQuery(**query_data)
+        
+        # Assert
+        assert query.is_valid() == True
+        assert query.question == "Show me sales data"
+        assert query.query_type == "database"
+    
+    def test_invalid_query_empty_question(self):
+        """RED: Test invalid query behavior."""
+        # Arrange
+        query_data = {
+            "id": "query-123",
+            "question": "",  # Invalid: empty question
+            "user_id": "user-456",
+            "created_at": datetime.utcnow(),
+            "query_type": "database", 
+            "status": "pending"
+        }
+        
+        # Act
+        query = DataAnalysisQuery(**query_data)
+        
+        # Assert
+        assert query.is_valid() == False
+    
+    def test_invalid_query_type(self):
+        """RED: Test validation of query type."""
+        # Arrange
+        query_data = {
+            "id": "query-123", 
+            "question": "Valid question",
+            "user_id": "user-456",
+            "created_at": datetime.utcnow(),
+            "query_type": "invalid_type",  # Invalid type
+            "status": "pending"
+        }
+        
+        # Act
+        query = DataAnalysisQuery(**query_data)
+        
+        # Assert
+        assert query.is_valid() == False
+
+# 🔴 RED: Run tests - they MUST fail
+# pytest tests/test_analysis_query.py -v
+# EXPECTED: ImportError or AttributeError - DataAnalysisQuery doesn't exist yet
+```
+
+### 2. GREEN PHASE: Write Minimal Code to Pass
+```python
+# ✅ REQUIRED: Write ONLY enough code to make tests pass
+
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Literal
+
+@dataclass(frozen=True)
+class DataAnalysisQuery:
+    """Minimal implementation to make tests pass."""
+    
+    id: str
+    question: str
+    user_id: str
+    created_at: datetime
+    query_type: Literal["database", "excel", "general"]
+    status: Literal["pending", "processing", "completed", "failed"]
+    
+    def is_valid(self) -> bool:
+        """Minimal validation logic to satisfy tests."""
+        # Make test_valid_query_creation pass
+        if len(self.question.strip()) == 0:
+            return False
+        
+        # Make test_invalid_query_type pass  
+        if self.query_type not in ["database", "excel", "general"]:
+            return False
+            
+        if self.status not in ["pending", "processing", "completed", "failed"]:
+            return False
+            
+        return True
+
+# 🟢 GREEN: Run tests - they MUST pass now
+# pytest tests/test_analysis_query.py -v
+# EXPECTED: All tests pass
+```
+
+### 3. REFACTOR PHASE: Improve Code Quality
+```python
+# ✅ REQUIRED: Refactor while keeping tests green
+
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Literal
+from enum import Enum
+
+class QueryType(Enum):
+    """Refactor: Extract enum for better type safety."""
+    DATABASE = "database"
+    EXCEL = "excel" 
+    GENERAL = "general"
+
+class QueryStatus(Enum):
+    """Refactor: Extract enum for better type safety."""
+    PENDING = "pending"
+    PROCESSING = "processing"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+@dataclass(frozen=True)
+class DataAnalysisQuery:
+    """Refactored: Better structure, same behavior."""
+    
+    id: str
+    question: str
+    user_id: str
+    created_at: datetime
+    query_type: str  # Keep as string for JSON serialization
+    status: str      # Keep as string for JSON serialization
+    
+    def is_valid(self) -> bool:
+        """Refactored: More readable validation."""
+        return (
+            self._has_valid_question() and
+            self._has_valid_type() and
+            self._has_valid_status()
+        )
+    
+    def _has_valid_question(self) -> bool:
+        """Refactor: Extract validation methods."""
+        return len(self.question.strip()) > 0
+    
+    def _has_valid_type(self) -> bool:
+        """Refactor: Use enum values for validation."""
+        valid_types = [qt.value for qt in QueryType]
+        return self.query_type in valid_types
+    
+    def _has_valid_status(self) -> bool:
+        """Refactor: Use enum values for validation."""
+        valid_statuses = [qs.value for qs in QueryStatus]
+        return self.status in valid_statuses
+
+# 🔵 REFACTOR: Run tests - they MUST still pass
+# pytest tests/test_analysis_query.py -v
+# EXPECTED: All tests still pass with improved code
+```
+
+## 🎯 TDD USE CASE IMPLEMENTATION
+
+### Use Case TDD Example: Execute Analysis
+```python
+# ✅ STEP 1: RED - Write failing test for use case
+
+import pytest
+from unittest.mock import Mock, AsyncMock
+from use_cases.analysis.execute_analysis import ExecuteAnalysisUseCase
+from domain.entities.analysis_query import DataAnalysisQuery
+from domain.exceptions import PermissionDeniedError, InvalidQueryError
+
+class TestExecuteAnalysisUseCase:
+    """TDD: Test use case before implementation."""
+    
+    @pytest.fixture
+    def mock_dependencies(self):
+        """Setup mocks for dependencies."""
+        return {
+            "query_repository": Mock(),
+            "analysis_engine": Mock(),
+            "user_permissions": Mock()
+        }
+    
+    @pytest.fixture
+    def use_case(self, mock_dependencies):
+        """Create use case with mocked dependencies."""
+        return ExecuteAnalysisUseCase(**mock_dependencies)
+    
+    @pytest.mark.asyncio
+    async def test_successful_analysis_execution(self, use_case, mock_dependencies):
+        """RED: Test successful analysis flow."""
+        # Arrange
+        request = AnalysisRequest(
+            user_id="user-123",
+            question="Show me sales data",
+            query_type="database"
+        )
+        
+        # Setup mocks
+        mock_dependencies["user_permissions"].can_execute_analysis.return_value = True
+        mock_dependencies["analysis_engine"].analyze_question.return_value = QuestionAnalysis(
+            intent="sales_query",
+            confidence=0.9
+        )
+        mock_dependencies["query_repository"].save.return_value = None
+        
+        # Act
+        result = await use_case.execute(request)
+        
+        # Assert
+        assert result.success == True
+        assert result.query_id is not None
+        mock_dependencies["user_permissions"].can_execute_analysis.assert_called_once_with("user-123")
+        mock_dependencies["query_repository"].save.assert_called_once()
+    
+    @pytest.mark.asyncio 
+    async def test_permission_denied(self, use_case, mock_dependencies):
+        """RED: Test permission denied scenario."""
+        # Arrange
+        request = AnalysisRequest(
+            user_id="user-123",
+            question="Show me sales data",
+            query_type="database"
+        )
+        
+        # Setup mocks - user has no permission
+        mock_dependencies["user_permissions"].can_execute_analysis.return_value = False
+        
+        # Act & Assert
+        with pytest.raises(PermissionDeniedError):
+            await use_case.execute(request)
+        
+        # Verify repository was never called
+        mock_dependencies["query_repository"].save.assert_not_called()
+
+# 🔴 RED: Tests fail - ExecuteAnalysisUseCase doesn't exist
+```
+
+```python
+# ✅ STEP 2: GREEN - Minimal implementation to pass tests
+
+from dataclasses import dataclass
+from typing import Protocol
+import uuid
+from datetime import datetime
+
+@dataclass
+class AnalysisRequest:
+    user_id: str
+    question: str
+    query_type: str
+
+@dataclass  
+class AnalysisResult:
+    success: bool
+    query_id: str
+
+class IUserPermissions(Protocol):
+    async def can_execute_analysis(self, user_id: str) -> bool: ...
+
+class IAnalysisEngine(Protocol):
+    async def analyze_question(self, question: str) -> Any: ...
+
+class IQueryRepository(Protocol):
+    async def save(self, query: DataAnalysisQuery) -> None: ...
+
+class ExecuteAnalysisUseCase:
+    """Minimal implementation to pass tests."""
+    
+    def __init__(
+        self,
+        query_repository: IQueryRepository,
+        analysis_engine: IAnalysisEngine, 
+        user_permissions: IUserPermissions
+    ):
+        self._query_repository = query_repository
+        self._analysis_engine = analysis_engine
+        self._user_permissions = user_permissions
+    
+    async def execute(self, request: AnalysisRequest) -> AnalysisResult:
+        """Minimal logic to satisfy tests."""
+        
+        # Check permissions (make permission test pass)
+        can_execute = await self._user_permissions.can_execute_analysis(request.user_id)
+        if not can_execute:
+            raise PermissionDeniedError("User cannot execute analysis")
+        
+        # Create query entity
+        query = DataAnalysisQuery(
+            id=str(uuid.uuid4()),
+            question=request.question,
+            user_id=request.user_id,
+            created_at=datetime.utcnow(),
+            query_type=request.query_type,
+            status="pending"
+        )
+        
+        # Save query (make repository test pass)
+        await self._query_repository.save(query)
+        
+        # Return result (make success test pass)
+        return AnalysisResult(
+            success=True,
+            query_id=query.id
+        )
+
+# 🟢 GREEN: Tests now pass
+```
+
+## 🧪 ADVANCED TDD PATTERNS
+
+### 1. Test Doubles (Mocks, Stubs, Fakes)
+```python
+# ✅ REQUIRED: Use appropriate test doubles
+
+class TestSQLGenerator:
+    """TDD with different types of test doubles."""
+    
+    @pytest.fixture
+    def mock_llm_client(self):
+        """Mock: Verify interactions with LLM."""
+        mock = Mock()
+        mock.generate.return_value = "SELECT * FROM users WHERE id = 1"
+        return mock
+    
+    @pytest.fixture
+    def stub_schema(self):
+        """Stub: Provide predetermined responses."""
+        return DatabaseSchema(
+            tables={
+                "users": Table(
+                    columns=[
+                        Column("id", "integer"),
+                        Column("name", "varchar"),
+                        Column("email", "varchar")
+                    ]
+                )
+            }
+        )
+    
+    @pytest.fixture
+    def fake_cache(self):
+        """Fake: Working implementation for testing."""
+        return InMemoryCache()  # Real behavior, but in-memory
+    
+    def test_sql_generation_with_mock(self, mock_llm_client, stub_schema):
+        """Test using mock to verify LLM interaction."""
+        # Arrange
+        generator = SQLGenerator(mock_llm_client)
+        question = "Show me all users"
+        
+        # Act
+        sql = generator.generate_sql(question, stub_schema)
+        
+        # Assert
+        assert sql == "SELECT * FROM users WHERE id = 1"
+        mock_llm_client.generate.assert_called_once()
+        
+        # Verify the prompt was constructed correctly
+        call_args = mock_llm_client.generate.call_args[0][0]
+        assert "users" in call_args
+        assert question in call_args
+```
+
+### 2. Property-Based Testing with Hypothesis
+```python
+# ✅ ADVANCED: Property-based testing for robust validation
+
+from hypothesis import given, strategies as st
+
+class TestDataValidation:
+    """Property-based tests for comprehensive validation."""
+    
+    @given(st.text(min_size=1, max_size=1000))
+    def test_valid_questions_always_create_valid_queries(self, question):
+        """Property: Any non-empty string should create valid query."""
+        # Arrange
+        query = DataAnalysisQuery(
+            id="test-id",
+            question=question,
+            user_id="user-123",
+            created_at=datetime.utcnow(),
+            query_type="database",
+            status="pending"
+        )
+        
+        # Act & Assert
+        if len(question.strip()) > 0:
+            assert query.is_valid() == True
+        else:
+            assert query.is_valid() == False
+    
+    @given(st.text().filter(lambda x: len(x.strip()) == 0))
+    def test_empty_questions_always_invalid(self, empty_question):
+        """Property: Empty questions should always be invalid."""
+        # Arrange
+        query = DataAnalysisQuery(
+            id="test-id", 
+            question=empty_question,
+            user_id="user-123",
+            created_at=datetime.utcnow(),
+            query_type="database",
+            status="pending"
+        )
+        
+        # Act & Assert
+        assert query.is_valid() == False
+```
+
+### 3. Integration Tests with TDD
+```python
+# ✅ REQUIRED: TDD for integration tests
+
+class TestDatabaseIntegration:
+    """Integration tests following TDD approach."""
+    
+    @pytest.fixture
+    async def test_db_session(self):
+        """Setup test database session."""
+        # Create test database
+        engine = create_async_engine("sqlite+aiosqlite:///:memory:")
+        
+        # Create tables
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        
+        # Create session
+        async_session = async_sessionmaker(engine)
+        async with async_session() as session:
+            yield session
+        
+        await engine.dispose()
+    
+    @pytest.mark.asyncio
+    async def test_save_and_retrieve_query(self, test_db_session):
+        """RED: Integration test for repository."""
+        # Arrange
+        repository = SqlAlchemyQueryRepository(test_db_session)
+        query = DataAnalysisQuery(
+            id="test-query-123",
+            question="Show me data",
+            user_id="user-456",
+            created_at=datetime.utcnow(),
+            query_type="database",
+            status="pending"
+        )
+        
+        # Act
+        await repository.save(query)
+        retrieved_query = await repository.find_by_id("test-query-123")
+        
+        # Assert
+        assert retrieved_query is not None
+        assert retrieved_query.id == "test-query-123"
+        assert retrieved_query.question == "Show me data"
+        assert retrieved_query.user_id == "user-456"
+```
+
+## 🚫 TDD ANTI-PATTERNS (FORBIDDEN)
+
+### 1. Testing After Implementation
+```python
+# 🚫 FORBIDDEN: Writing tests after code exists
+def some_business_logic():
+    """Already implemented - TDD violated!"""
+    return calculate_complex_result()
+
+# 🚫 BAD: Test written after implementation
+def test_some_business_logic():
+    """Written to fit existing implementation - NOT TDD!"""
+    result = some_business_logic()
+    assert result == "whatever it currently returns"  # Useless test!
+```
+
+### 2. Testing Implementation Details
+```python
+# 🚫 FORBIDDEN: Testing internal implementation
+class TestAnalysisService:
+    def test_internal_method_called(self):
+        """BAD: Testing implementation, not behavior."""
+        service = AnalysisService()
+        
+        # BAD: Testing internal method calls
+        with patch.object(service, '_internal_helper') as mock_helper:
+            service.analyze("question")
+            mock_helper.assert_called_once()  # Tests implementation!
+```
+
+### 3. Over-Mocking
+```python
+# 🚫 FORBIDDEN: Mocking everything
+def test_with_too_many_mocks():
+    """BAD: So many mocks that test becomes meaningless."""
+    with patch('module.ClassA') as mock_a, \
+         patch('module.ClassB') as mock_b, \
+         patch('module.ClassC') as mock_c, \
+         patch('module.function_d') as mock_d:
+        
+        # Test tells us nothing about real behavior
+        result = service.do_something()
+        assert result == mock_a.return_value  # Meaningless
+```
+
+## 📋 TDD QUALITY CHECKLIST
+
+### Red Phase Requirements
+- [ ] ✅ Test written before any production code
+- [ ] ✅ Test fails for the right reason
+- [ ] ✅ Test describes desired behavior clearly
+- [ ] ✅ Test is minimal and focused
+- [ ] ✅ Test runs and fails as expected
+
+### Green Phase Requirements  
+- [ ] ✅ Minimal code written to pass test
+- [ ] ✅ No extra features implemented
+- [ ] ✅ All tests pass
+- [ ] ✅ Code works but may not be perfect
+- [ ] ✅ Focus is on making test green
+
+### Refactor Phase Requirements
+- [ ] ✅ Code structure improved
+- [ ] ✅ Duplication removed
+- [ ] ✅ Names clarified
+- [ ] ✅ All tests still pass
+- [ ] ✅ Behavior unchanged
+
+### Overall TDD Quality
+- [ ] ✅ Every line of code covered by tests
+- [ ] ✅ Tests document expected behavior
+- [ ] ✅ Tests run fast (< 1 second each)
+- [ ] ✅ Tests are independent and isolated
+- [ ] ✅ Tests use appropriate test doubles
+
+## 🎯 TDD SUCCESS METRICS
+
+### Code Coverage Targets
+- **Unit Tests**: 100% line coverage
+- **Integration Tests**: 90% path coverage  
+- **End-to-End Tests**: 80% user scenario coverage
+
+### Test Performance Targets
+- **Unit Tests**: < 1 second each
+- **Integration Tests**: < 5 seconds each
+- **Full Test Suite**: < 30 seconds total
+
+### Test Quality Metrics
+- **Test-to-Code Ratio**: 2:1 or higher
+- **Assertion Density**: 3-5 assertions per test
+- **Mock Usage**: < 30% of tests use mocks
+
+Remember: **TDD is not about testing - it's about DESIGN.** Tests drive the design of your code. If testing is hard, your design is wrong. TDD forces you to write testable, decoupled, maintainable code from the start.

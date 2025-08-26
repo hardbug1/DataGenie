@@ -1,0 +1,127 @@
+---
+alwaysApply: true
+description: DataGenie project structure and architecture guidelines
+---
+
+# DataGenie Project Structure & Architecture Rules
+
+## 🏗️ CRITICAL PROJECT STRUCTURE
+You are working on **DataGenie**, an LLM-based data analysis and visualization service built with:
+- **Backend**: FastAPI + LangChain + SQLAlchemy
+- **Frontend**: Gradio web interface
+- **Database**: PostgreSQL (system) + External DBs (PostgreSQL/MySQL/SQLite)
+- **Cache**: Redis
+- **AI**: OpenAI GPT-4 integration
+
+## 📁 MANDATORY DIRECTORY STRUCTURE
+```
+datagenie/
+├── app/                    # Main application code
+│   ├── main.py            # FastAPI entry point
+│   ├── config/            # Configuration management
+│   ├── models/            # SQLAlchemy database models
+│   ├── schemas/           # Pydantic schemas
+│   ├── api/v1/           # API endpoints
+│   ├── core/             # Core business logic
+│   │   ├── nlp/          # Natural language processing
+│   │   ├── query/        # Database query engine
+│   │   ├── excel/        # Excel analysis engine
+│   │   └── visualization/ # Chart generation
+│   ├── auth/             # Authentication & authorization
+│   ├── cache/            # Redis caching logic
+│   └── utils/            # Utility functions
+├── docs/                  # Project documentation
+├── tests/                # Test files (mirror app structure)
+├── scripts/              # Database migrations & utilities
+├── requirements/         # Dependency management
+└── docker/              # Docker configurations
+```
+
+## ⚡ ABSOLUTE MUST-DO RULES
+
+### 1. SECURITY FIRST
+- **NEVER** store secrets in code - use environment variables ONLY
+- **ALWAYS** use read-only database connections for external data sources
+- **MANDATORY** SQL injection prevention on ALL queries
+- **REQUIRED** input validation on ALL user inputs
+- **ESSENTIAL** JWT token validation on protected endpoints
+
+### 2. CODE ORGANIZATION
+- **MUST** follow the exact directory structure above
+- **REQUIRED** separate concerns: NLP → Query → Visualization → Response
+- **MANDATORY** use dependency injection for all services
+- **ESSENTIAL** implement proper error handling with structured logging
+
+### 3. DATA HANDLING
+- **CRITICAL** implement personal data masking automatically
+- **REQUIRED** cache frequently used queries in Redis
+- **MANDATORY** limit query execution time (30 seconds max)
+- **ESSENTIAL** validate file uploads (type, size, content)
+
+## 🚫 ABSOLUTE NEVER-DO RULES
+
+### 1. SECURITY VIOLATIONS
+- **NEVER** allow DDL operations (CREATE, DROP, ALTER) from user queries
+- **NEVER** execute dynamic SQL without parameterization
+- **NEVER** store passwords in plain text
+- **NEVER** expose internal error details to users
+- **NEVER** trust user input without validation
+
+### 2. PERFORMANCE KILLERS
+- **NEVER** load entire large datasets into memory at once
+- **NEVER** make synchronous API calls without timeouts
+- **NEVER** forget to implement connection pooling
+- **NEVER** skip caching for expensive operations
+- **NEVER** allow unbounded result sets
+
+### 3. CODE QUALITY ISSUES
+- **NEVER** mix business logic with presentation layer
+- **NEVER** hardcode configuration values
+- **NEVER** ignore exception handling
+- **NEVER** skip input sanitization
+- **NEVER** commit commented-out code
+
+## 🔄 WORKFLOW PATTERNS
+
+### Request Processing Flow
+```
+User Input → Validation → NLP Analysis → Route Decision
+     ↓
+[DB Query Path]           [Excel Analysis Path]
+     ↓                         ↓
+SQL Generation           Code Generation
+     ↓                         ↓
+Query Execution         Safe Execution
+     ↓                         ↓
+     └────→ Visualization ←────┘
+             ↓
+         Response Generation
+```
+
+### Error Handling Strategy
+- **Log everything** with structured logging (structlog)
+- **Return user-friendly** error messages
+- **Implement retry logic** for transient failures
+- **Graceful degradation** when services are unavailable
+
+## 📊 NAMING CONVENTIONS
+
+### Files and Directories
+- Use snake_case for Python files: `nlp_processor.py`
+- Use kebab-case for configuration files: `docker-compose.yml`
+- Descriptive names that explain purpose: `query_result_cache.py`
+
+### Code Elements
+- Classes: PascalCase → `DataAnalysisEngine`
+- Functions: snake_case → `analyze_natural_language_query`
+- Variables: snake_case → `user_question_text`
+- Constants: UPPER_SNAKE_CASE → `MAX_QUERY_EXECUTION_TIME`
+
+## 🎯 KEY SUCCESS METRICS
+- Response time < 10 seconds for simple queries
+- Response time < 30 seconds for complex analysis
+- 99% uptime during business hours
+- Zero security vulnerabilities
+- 90%+ query success rate
+
+Remember: This is a production system handling sensitive data. Every decision must prioritize security, performance, and user experience.
