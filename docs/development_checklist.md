@@ -8,8 +8,8 @@
 ## 🚀 Phase 1: 프로젝트 초기 설정 (1주차)
 
 ### 📁 1.1 프로젝트 구조 생성
-- [ ] 프로젝트 루트 디렉터리 생성
-- [ ] 기본 폴더 구조 생성
+- [x] 프로젝트 루트 디렉터리 생성
+- [x] 기본 폴더 구조 생성
   ```
   datagenie/
   ├── app/
@@ -19,37 +19,37 @@
   ├── requirements/
   └── docker/
   ```
-- [ ] `.gitignore` 파일 생성 (Python, IDE, 환경변수 등)
-- [ ] `README.md` 기본 내용 작성
-- [ ] **🔄 커밋**: `feat: 프로젝트 초기 구조 설정`
+- [x] `.gitignore` 파일 생성 (Python, IDE, 환경변수 등)
+- [x] `README.md` 기본 내용 작성
+- [x] **🔄 커밋**: `feat: 프로젝트 초기 구조 설정`
 
 ### ⚙️ 1.2 개발 환경 설정
-- [ ] Python 3.11+ 가상환경 생성
+- [x] Python 3.11+ 가상환경 생성
   ```bash
   python -m venv venv
   source venv/bin/activate  # macOS/Linux
   ```
-- [ ] 기본 의존성 파일 생성
-  - [ ] `requirements/base.txt` - 기본 패키지
-  - [ ] `requirements/dev.txt` - 개발용 패키지
-  - [ ] `requirements/prod.txt` - 운영용 패키지
-- [ ] 환경변수 파일 설정
-  - [ ] `.env.example` 템플릿 생성
-  - [ ] `.env` 파일 생성 (gitignore에 포함)
-- [ ] **🔄 커밋**: `feat: 개발 환경 설정 및 의존성 정의`
+- [x] 기본 의존성 파일 생성
+  - [x] `requirements/base.txt` - 기본 패키지
+  - [x] `requirements/dev.txt` - 개발용 패키지
+  - [x] `requirements/prod.txt` - 운영용 패키지
+- [x] 환경변수 파일 설정
+  - [x] `env.example` 템플릿 생성
+  - [x] `.env` 파일 생성 (gitignore에 포함)
+- [x] **🔄 커밋**: `feat: 개발 환경 설정 및 의존성 정의`
 
 ### 🐳 1.3 Docker 설정
-- [ ] `Dockerfile` 작성
-- [ ] `docker-compose.yml` 작성 (app, postgres, redis)
-- [ ] `docker-compose.dev.yml` 개발용 설정
-- [ ] Docker 빌드 및 실행 테스트
-- [ ] **🔄 커밋**: `feat: Docker 컨테이너 설정`
+- [x] `Dockerfile` 작성
+- [x] `docker-compose.yml` 작성 (app, postgres, redis)
+- [x] `docker-compose.dev.yml` 개발용 설정
+- [x] Docker 빌드 및 실행 테스트
+- [x] **🔄 커밋**: `feat: Docker 컨테이너 설정`
 
 ### 📊 1.4 데이터베이스 초기 설정
-- [ ] PostgreSQL 컨테이너 실행 확인
-- [ ] Redis 컨테이너 실행 확인
-- [ ] 데이터베이스 연결 테스트
-- [ ] **🔄 커밋**: `feat: 데이터베이스 컨테이너 설정`
+- [x] PostgreSQL 컨테이너 실행 확인
+- [x] Redis 컨테이너 실행 확인
+- [x] 데이터베이스 연결 테스트
+- [x] **🔄 커밋**: `feat: 데이터베이스 컨테이너 설정`
 
 ## 🏗️ Phase 2: 백엔드 기본 구조 (2주차)
 
