@@ -7,19 +7,13 @@ users in the database. Domain logic should be kept separate.
 
 import uuid
 from datetime import datetime
-from typing import List, TYPE_CHECKING
+from typing import List, Optional
 
-from sqlalchemy import Column, String, DateTime, Boolean, Text
+from sqlalchemy import String, DateTime, Boolean, Text, func
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from app.config.database import Base
-
-if TYPE_CHECKING:
-    from app.models.database_connection import DatabaseConnection
-    from app.models.query_history import QueryHistory
-    from app.models.user_session import UserSession
 
 
 class User(Base):
@@ -33,106 +27,67 @@ class User(Base):
     __tablename__ = "users"
     
     # Primary key
-    id = Column(
+    id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), 
         primary_key=True, 
-        default=uuid.uuid4,
-        comment="Unique user identifier"
+        default=uuid.uuid4
     )
     
     # Authentication fields
-    username = Column(
+    username: Mapped[str] = mapped_column(
         String(50), 
         unique=True, 
-        nullable=False, 
-        index=True,
-        comment="Unique username for login"
+        index=True
     )
     
-    email = Column(
+    email: Mapped[str] = mapped_column(
         String(100), 
         unique=True, 
-        nullable=False, 
-        index=True,
-        comment="User email address"
+        index=True
     )
     
-    password_hash = Column(
-        String(255), 
-        nullable=False,
-        comment="Hashed password (bcrypt)"
-    )
+    password_hash: Mapped[str] = mapped_column(String(255))
     
     # Profile fields
-    full_name = Column(
-        String(100),
-        comment="User's full name"
-    )
+    full_name: Mapped[Optional[str]] = mapped_column(String(100), default=None)
     
     # Role and permissions
-    role = Column(
-        String(20), 
-        nullable=False, 
-        default="user",
-        comment="User role (admin, user, etc.)"
-    )
-    
-    is_active = Column(
-        Boolean, 
-        nullable=False, 
-        default=True,
-        comment="Whether the user account is active"
-    )
-    
-    is_verified = Column(
-        Boolean, 
-        nullable=False, 
-        default=False,
-        comment="Whether the user email is verified"
-    )
+    role: Mapped[str] = mapped_column(String(20), default="user")
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    is_verified: Mapped[bool] = mapped_column(Boolean, default=False)
     
     # Metadata
-    created_at = Column(
+    created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), 
-        nullable=False, 
-        server_default=func.now(),
-        comment="When the user was created"
+        server_default=func.now()
     )
     
-    updated_at = Column(
+    updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), 
-        nullable=False, 
         server_default=func.now(), 
-        onupdate=func.now(),
-        comment="When the user was last updated"
+        onupdate=func.now()
     )
     
-    last_login_at = Column(
+    last_login_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True),
-        comment="When the user last logged in"
+        default=None
     )
     
     # Additional profile data (JSON field for flexibility)
-    profile_data = Column(
-        Text,
-        comment="Additional profile data as JSON"
-    )
+    profile_data: Mapped[Optional[str]] = mapped_column(Text, default=None)
     
-    # Relationships
-    database_connections: List["DatabaseConnection"] = relationship(
-        "DatabaseConnection",
+    # Relationships (using string-based forward references)
+    database_connections: Mapped[List["DatabaseConnection"]] = relationship(
         back_populates="user",
         cascade="all, delete-orphan"
     )
     
-    query_histories: List["QueryHistory"] = relationship(
-        "QueryHistory",
+    query_histories: Mapped[List["QueryHistory"]] = relationship(
         back_populates="user",
         cascade="all, delete-orphan"
     )
     
-    user_sessions: List["UserSession"] = relationship(
-        "UserSession",
+    user_sessions: Mapped[List["UserSession"]] = relationship(
         back_populates="user",
         cascade="all, delete-orphan"
     )

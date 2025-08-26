@@ -8,7 +8,8 @@ but is accessed by all layers through dependency injection.
 import os
 import secrets
 from typing import List, Optional, Any, Dict
-from pydantic import BaseSettings, validator, Field
+from pydantic import Field, field_validator
+from pydantic_settings import BaseSettings
 from functools import lru_cache
 
 
@@ -73,18 +74,18 @@ class Settings(BaseSettings):
     # File Upload Configuration
     max_file_size_mb: int = Field(default=50, env="MAX_FILE_SIZE_MB")
     upload_dir: str = Field(default="uploads", env="UPLOAD_DIR")
-    allowed_file_types: List[str] = Field(
-        default=[".xlsx", ".xls", ".csv"], 
+    allowed_file_types: str = Field(
+        default=".xlsx,.xls,.csv", 
         env="ALLOWED_FILE_TYPES"
     )
     
     # Security Settings
-    cors_origins: List[str] = Field(
-        default=["http://localhost:3000", "http://localhost:8000"],
+    cors_origins: str = Field(
+        default="http://localhost:3000,http://localhost:8000",
         env="CORS_ORIGINS"
     )
-    trusted_hosts: List[str] = Field(
-        default=["localhost", "127.0.0.1"],
+    trusted_hosts: str = Field(
+        default="localhost,127.0.0.1",
         env="TRUSTED_HOSTS"
     )
     rate_limit_per_minute: int = Field(default=100, env="RATE_LIMIT_PER_MINUTE")
@@ -92,7 +93,8 @@ class Settings(BaseSettings):
     # External Database Configuration
     external_db_configs: Dict[str, Any] = Field(default_factory=dict)
     
-    @validator("openai_api_key")
+    @field_validator("openai_api_key")
+    @classmethod
     def validate_openai_api_key(cls, v):
         """Validate OpenAI API key format"""
         if not v or v == "your-openai-api-key-here":
@@ -101,7 +103,8 @@ class Settings(BaseSettings):
             raise ValueError("OpenAI API key must start with 'sk-'")
         return v
     
-    @validator("log_level")
+    @field_validator("log_level")
+    @classmethod
     def validate_log_level(cls, v):
         """Validate log level"""
         valid_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
@@ -109,32 +112,27 @@ class Settings(BaseSettings):
             raise ValueError(f"Log level must be one of: {valid_levels}")
         return v.upper()
     
-    @validator("allowed_file_types")
+    @field_validator("allowed_file_types")
+    @classmethod
     def validate_file_types(cls, v):
         """Validate file extensions"""
         if isinstance(v, str):
-            # Handle comma-separated string from env
-            v = [ext.strip() for ext in v.split(",")]
-        
-        for ext in v:
-            if not ext.startswith("."):
-                raise ValueError(f"File extension must start with '.': {ext}")
+            exts = [ext.strip() for ext in v.split(",")]
+            for ext in exts:
+                if not ext.startswith("."):
+                    raise ValueError(f"File extension must start with '.': {ext}")
         return v
     
-    @validator("cors_origins")
+    @field_validator("cors_origins")
+    @classmethod
     def validate_cors_origins(cls, v):
         """Validate CORS origins"""
-        if isinstance(v, str):
-            # Handle comma-separated string from env
-            v = [origin.strip() for origin in v.split(",")]
         return v
     
-    @validator("trusted_hosts") 
+    @field_validator("trusted_hosts")
+    @classmethod
     def validate_trusted_hosts(cls, v):
         """Validate trusted hosts"""
-        if isinstance(v, str):
-            # Handle comma-separated string from env
-            v = [host.strip() for host in v.split(",")]
         return v
     
     @property
@@ -151,6 +149,21 @@ class Settings(BaseSettings):
     def is_production(self) -> bool:
         """Check if running in production mode"""
         return not self.is_development
+    
+    @property
+    def allowed_file_types_list(self) -> List[str]:
+        """Get allowed file types as a list"""
+        return [ext.strip() for ext in self.allowed_file_types.split(",")]
+    
+    @property
+    def cors_origins_list(self) -> List[str]:
+        """Get CORS origins as a list"""
+        return [origin.strip() for origin in self.cors_origins.split(",")]
+    
+    @property
+    def trusted_hosts_list(self) -> List[str]:
+        """Get trusted hosts as a list"""
+        return [host.strip() for host in self.trusted_hosts.split(",")]
     
     def get_database_url(self, async_driver: bool = True) -> str:
         """Generate database URL with appropriate driver"""
