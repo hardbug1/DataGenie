@@ -1,0 +1,24 @@
+# Include base requirements
+-r base.txt
+
+# Production Server
+gunicorn==21.2.0
+
+# Production Database
+psycopg2-binary==2.9.9  # PostgreSQL production driver
+
+# Monitoring and Observability
+prometheus-client==0.19.0
+statsd==4.0.1
+
+# Production Utilities
+sentry-sdk[fastapi]==1.38.0  # Error tracking
+celery==5.3.4  # Task queue (if needed)
+flower==2.0.1  # Celery monitoring
+
+# Security
+cryptography==41.0.8
+certifi==2023.11.17
+
+# Performance
+orjson==3.9.10  # Faster JSON serialization
