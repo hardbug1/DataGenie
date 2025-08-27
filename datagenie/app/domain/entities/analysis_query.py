@@ -119,7 +119,44 @@ class AnalysisQuery:
         Returns:
             bool: 실행 가능 여부
         """
-        return self.user_id == user_id
+        return self.user_id == user_id and user_id.strip() != ""
+    
+    def with_status(
+        self, 
+        new_status: QueryStatus, 
+        execution_time_ms: Optional[int] = None,
+        error_message: Optional[str] = None
+    ) -> "AnalysisQuery":
+        """
+        상태가 변경된 새로운 쿼리 인스턴스 생성
+        
+        Args:
+            new_status: 새로운 상태
+            execution_time_ms: 실행 시간 (밀리초)
+            error_message: 에러 메시지
+            
+        Returns:
+            AnalysisQuery: 상태가 변경된 새 인스턴스
+        """
+        return AnalysisQuery(
+            id=self.id,
+            question=self.question,
+            user_id=self.user_id,
+            query_type=self.query_type,
+            status=new_status,
+            created_at=self.created_at,
+            connection_id=self.connection_id,
+            execution_time_ms=execution_time_ms or self.execution_time_ms,
+            error_message=error_message or self.error_message
+        )
+    
+    def has_error(self) -> bool:
+        """에러가 있는지 확인"""
+        return self.status == QueryStatus.FAILED and self.error_message is not None
+    
+    def __str__(self) -> str:
+        """문자열 표현"""
+        return f"AnalysisQuery(id={self.id}, question='{self.question[:50]}...', user_id={self.user_id}, status={self.status.value})"
     
     def is_processing(self) -> bool:
         """쿼리가 처리 중인지 확인"""
