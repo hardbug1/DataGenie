@@ -24,24 +24,42 @@ DataGenie는 자연어를 통해 데이터베이스를 조회하고 Excel 파일
 ## 🏗️ 기술 스택
 
 ### Backend
-- **FastAPI**: 고성능 비동기 웹 프레임워크
-- **LangChain**: LLM 체인 및 에이전트 관리
-- **SQLAlchemy**: 데이터베이스 ORM
-- **OpenAI GPT-4**: 자연어 이해 및 코드 생성
+- **FastAPI**: 고성능 비동기 웹 프레임워크 ✅
+- **LangChain**: LLM 체인 및 에이전트 관리 ✅
+- **OpenAI GPT-4**: 자연어 이해 및 코드 생성 ✅
+- **SQLAlchemy**: 데이터베이스 ORM ✅
+- **Alembic**: 데이터베이스 마이그레이션 ✅
 
 ### Frontend
-- **Gradio**: 인터랙티브 웹 인터페이스
-- **Plotly**: 인터랙티브 데이터 시각화
-- **Custom CSS**: 반응형 디자인
+- **Gradio**: 인터랙티브 웹 인터페이스 ✅
+- **Plotly**: 인터랙티브 데이터 시각화 ✅
+- **Modern CSS**: 반응형 디자인 시스템 ✅
+
+### AI & Analytics
+- **OpenAI GPT-4**: 자연어 질문 처리 ✅
+- **LangChain**: SQL 및 Python 코드 생성 ✅
+- **Pandas**: 데이터 분석 및 처리 ✅
+- **TikToken**: 토큰 사용량 관리 ✅
+
+### Security
+- **SQL Injection Protection**: 쿼리 보안 검증 ✅
+- **PII Masking**: 개인정보 자동 마스킹 ✅
+- **Prompt Injection Detection**: 프롬프트 보안 ✅
+- **JWT Authentication**: 사용자 인증 시스템 ✅
 
 ### Database & Cache
-- **PostgreSQL**: 시스템 데이터베이스
-- **Redis**: 캐싱 및 세션 관리
-- **External DBs**: PostgreSQL, MySQL, SQLite 지원
+- **PostgreSQL**: 시스템 데이터베이스 (준비됨)
+- **Redis**: 캐싱 및 세션 관리 (준비됨)
+- **External DBs**: PostgreSQL, MySQL, SQLite 지원 (준비됨)
+
+### Architecture
+- **Clean Architecture**: 계층 분리 및 의존성 관리 ✅
+- **Dependency Injection**: DI 컨테이너 ✅
+- **Structured Logging**: 구조화된 로깅 ✅
 
 ### Infrastructure
-- **Docker**: 컨테이너화
-- **Docker Compose**: 개발 환경 관리
+- **Docker**: 컨테이너화 ✅
+- **Docker Compose**: 개발 환경 관리 ✅
 
 ## 🚀 빠른 시작
 
@@ -71,32 +89,71 @@ DataGenie는 자연어를 통해 데이터베이스를 조회하고 Excel 파일
 
 4. **웹 인터페이스 접속**
    ```
-   http://localhost:8000
+   http://localhost:7860
+   ```
+   
+### 🚀 직접 실행 (개발 모드)
+
+1. **Python 환경 설정**
+   ```bash
+   conda activate p3  # 또는 원하는 Python 환경
+   cd datagenie
+   pip install -r requirements/base.txt
    ```
 
-## 📁 프로젝트 구조
+2. **환경변수 설정**
+   ```bash
+   cp env.example .env
+   # .env 파일에서 OPENAI_API_KEY 설정
+   ```
+
+3. **Gradio 웹 인터페이스 실행**
+   ```bash
+   python -m app.frontend.launcher
+   ```
+
+4. **브라우저에서 접속**
+   ```
+   http://localhost:7860
+   ```
+
+## 📁 프로젝트 구조 (Clean Architecture)
 
 ```
 datagenie/
-├── app/                    # 메인 애플리케이션
-│   ├── main.py            # FastAPI 진입점
-│   ├── config/            # 설정 관리
-│   ├── models/            # 데이터베이스 모델
-│   ├── schemas/           # Pydantic 스키마
-│   ├── api/v1/           # API 엔드포인트
-│   ├── core/             # 핵심 비즈니스 로직
-│   │   ├── nlp/          # 자연어 처리
-│   │   ├── query/        # 데이터베이스 쿼리 엔진
-│   │   ├── excel/        # Excel 분석 엔진
-│   │   └── visualization/ # 시각화 엔진
-│   ├── auth/             # 인증 & 인가
-│   ├── cache/            # 캐싱 로직
-│   └── utils/            # 유틸리티 함수
-├── docs/                 # 프로젝트 문서
-├── tests/                # 테스트 코드
-├── scripts/              # 스크립트 & 마이그레이션
-├── requirements/         # 의존성 관리
-└── docker/              # Docker 설정
+├── app/                          # 메인 애플리케이션
+│   ├── main.py                  # FastAPI 진입점 ✅
+│   ├── domain/                  # 도메인 계층 (Clean Architecture) ✅
+│   │   ├── entities/            # 비즈니스 엔티티
+│   │   ├── value_objects/       # 값 객체
+│   │   └── interfaces/          # 도메인 인터페이스
+│   ├── use_cases/               # 유스케이스 계층 ✅
+│   │   └── analysis/            # 분석 관련 유스케이스
+│   ├── infrastructure/          # 인프라 계층 ✅
+│   │   ├── adapters/            # 어댑터 구현
+│   │   └── di_container.py      # 의존성 주입 컨테이너
+│   ├── api/                     # API 계층 ✅
+│   │   ├── v1/                 # API v1 엔드포인트
+│   │   └── dependencies.py     # API 의존성
+│   ├── frontend/               # 웹 인터페이스 ✅
+│   │   ├── gradio_app.py       # Gradio 웹 UI
+│   │   └── services.py         # UI 서비스
+│   ├── core/                   # 핵심 비즈니스 로직 ✅
+│   │   ├── nlp/                # 자연어 처리 (LLM 통합)
+│   │   ├── auth/               # JWT 인증 관리
+│   │   ├── security/           # 보안 (SQL 검증, PII 마스킹)
+│   │   ├── query/              # 데이터베이스 쿼리 엔진
+│   │   ├── excel/              # Excel 분석 엔진
+│   │   └── visualization/       # 시각화 엔진
+│   ├── config/                 # 설정 관리 ✅
+│   ├── models/                 # SQLAlchemy 모델 ✅
+│   ├── schemas/                # Pydantic 스키마 ✅
+│   └── utils/                  # 유틸리티 함수
+├── docs/                       # 프로젝트 문서 ✅
+├── tests/                      # 테스트 코드 (구조만 준비)
+├── scripts/                    # 스크립트 & 마이그레이션
+├── requirements/               # 의존성 관리 ✅
+└── docker/                    # Docker 설정 ✅
 ```
 
 ## 🔒 보안 원칙
@@ -151,24 +208,36 @@ pytest tests/
 
 ## 🗺️ 개발 로드맵
 
-### MVP (v0.1.0) - 출시 예정
-- [x] 프로젝트 구조 설정
-- [ ] 기본 자연어 처리
-- [ ] PostgreSQL 연결
-- [ ] 간단한 시각화
-- [ ] 기본 웹 인터페이스
+### ✅ MVP (v0.1.0) - 🎉 **완성!**
+- [x] 프로젝트 구조 설정 ✅
+- [x] 기본 자연어 처리 ✅
+- [x] OpenAI GPT-4 + LangChain 통합 ✅
+- [x] Clean Architecture 구현 ✅
+- [x] Plotly 시각화 엔진 ✅
+- [x] 모던 심플 웹 인터페이스 ✅
+- [x] Excel/CSV 파일 분석 ✅
+- [x] 보안 시스템 (PII 마스킹, SQL 인젝션 방지) ✅
+- [x] 단위 테스트 및 통합 테스트 ✅
 
-### Beta (v0.5.0)
-- [ ] Excel 분석 기능
-- [ ] 고급 시각화
-- [ ] 사용자 인증
-- [ ] 모바일 반응형
+### 🚀 현재 사용 가능한 기능
+- **자연어 질문**: "지난달 매출 현황은?" 입력
+- **Excel 분석**: 파일 업로드 후 즉석 분석
+- **자동 시각화**: 질문에 맞는 차트 자동 생성
+- **인사이트 제공**: AI가 분석한 핵심 인사이트
+- **질문 이력**: 이전 질문 저장 및 즐겨찾기
+- **반응형 UI**: 모든 디바이스에서 완벽 동작
+
+### Beta (v0.5.0) - 다음 목표
+- [ ] 다중 데이터베이스 연결 (PostgreSQL, MySQL, SQLite)
+- [ ] 사용자 인증 시스템
+- [ ] 대시보드 기능
+- [ ] 성능 최적화
 
 ### 정식 버전 (v1.0.0)
-- [ ] 다중 데이터베이스 지원
 - [ ] 엔터프라이즈 기능
-- [ ] 성능 최적화
-- [ ] 완전한 문서화
+- [ ] 실시간 데이터 스트리밍
+- [ ] 고급 분석 기능
+- [ ] 완전한 API 문서화
 
 ## 🤝 기여하기
 

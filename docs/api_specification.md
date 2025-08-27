@@ -2,9 +2,23 @@
 
 ## 📋 문서 정보
 - **프로젝트명**: DataGenie (LLM 기반 데이터 질의·분석·시각화 서비스)
-- **작성일**: 2024년
-- **버전**: 1.0
+- **작성일**: 2024년 12월
+- **버전**: 2.0 (MVP 완성 버전)
 - **API 버전**: v1
+- **구현 상태**: 🎉 **주요 API 완전 구현됨**
+
+## ✅ 현재 구현된 API 엔드포인트
+
+### 📊 분석 API (완전 구현)
+- `POST /api/v1/analysis/execute` ✅ 구현 완료
+- `POST /api/v1/analysis/execute-with-file` ✅ 구현 완료
+- `GET /api/v1/analysis/history/{user_id}` ✅ 구현 완료
+- `GET /api/v1/analysis/{query_id}` ✅ 구현 완료
+
+### 🔧 시스템 API (구현 완료)
+- `GET /health` ✅ 구현 완료
+- `GET /api/v1/status` ✅ 구현 완료
+- `GET /` ✅ 구현 완료
 
 ## 🎯 API 개요
 
