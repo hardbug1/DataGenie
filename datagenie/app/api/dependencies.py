@@ -12,23 +12,53 @@ import structlog
 
 from app.use_cases.analysis.execute_analysis_use_case import ExecuteAnalysisUseCase
 from app.infrastructure.di_container import get_di_container
+from app.core.auth.jwt_manager import JWTManager, TokenType
+from app.core.security.sql_validator import SQLSecurityValidator
+from app.core.security.pii_masker import PIIMasker
 
 logger = structlog.get_logger(__name__)
 security = HTTPBearer()
 
+# 보안 컴포넌트 싱글톤 인스턴스
+_jwt_manager = None
+_sql_validator = None
+_pii_masker = None
+
+
+def get_jwt_manager() -> JWTManager:
+    """JWT 관리자 인스턴스 반환"""
+    global _jwt_manager
+    if _jwt_manager is None:
+        _jwt_manager = JWTManager()
+    return _jwt_manager
+
+
+def get_sql_validator() -> SQLSecurityValidator:
+    """SQL 보안 검증기 인스턴스 반환"""
+    global _sql_validator
+    if _sql_validator is None:
+        _sql_validator = SQLSecurityValidator()
+    return _sql_validator
+
+
+def get_pii_masker() -> PIIMasker:
+    """PII 마스킹 시스템 인스턴스 반환"""
+    global _pii_masker
+    if _pii_masker is None:
+        _pii_masker = PIIMasker()
+    return _pii_masker
+
 
 async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security)
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    jwt_manager: JWTManager = Depends(get_jwt_manager)
 ) -> Dict[str, Any]:
     """
     현재 사용자 정보 조회
     
-    TODO: JWT 토큰 검증 로직 구현 필요
-    현재는 임시 구현으로 더미 사용자 반환
+    JWT 토큰 검증을 통한 사용자 인증
     """
     try:
-        # TODO: JWT 토큰 검증 구현
-        # 현재는 개발용 더미 사용자 반환
         token = credentials.credentials
         
         if not token:
@@ -38,19 +68,49 @@ async def get_current_user(
                 headers={"WWW-Authenticate": "Bearer"},
             )
         
-        # 임시 더미 사용자 (실제로는 JWT에서 추출)
+        # JWT 토큰 검증
+        validation_result = jwt_manager.validate_token(token)
+        
+        if not validation_result.is_valid or not validation_result.payload:
+            logger.warning(
+                "토큰 검증 실패",
+                extra={
+                    "error": validation_result.error_message,
+                    "token_hash": token[:16] + "..." if len(token) > 16 else token
+                }
+            )
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=validation_result.error_message or "유효하지 않은 인증 토큰입니다",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        
+        payload = validation_result.payload
+        
+        # 액세스 토큰인지 확인
+        if payload.token_type != TokenType.ACCESS:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="액세스 토큰이 필요합니다",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        
+        # 사용자 정보 반환
         return {
-            "user_id": "dummy-user-id",
-            "username": "test_user",
-            "role": "user",
-            "permissions": ["analysis:execute", "query:read"]
+            "user_id": payload.user_id,
+            "username": payload.username,
+            "email": payload.email,
+            "role": payload.role,
+            "permissions": payload.permissions
         }
         
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error("사용자 인증 오류", error=str(e))
+        logger.error("사용자 인증 중 오류 발생", error=str(e))
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="유효하지 않은 인증 토큰입니다",
+            detail="인증 처리 중 오류가 발생했습니다",
             headers={"WWW-Authenticate": "Bearer"},
         )
 

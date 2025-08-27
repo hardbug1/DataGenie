@@ -17,6 +17,7 @@ import structlog
 from app.config.settings import get_settings
 from app.config.logging import setup_logging
 from app.api.v1.analysis import router as analysis_router
+from app.api.v1.auth import router as auth_router
 from app.infrastructure.di_container import get_di_container
 
 # 로깅 설정
@@ -81,6 +82,12 @@ app.add_middleware(
 )
 
 # API 라우터 등록
+app.include_router(
+    auth_router,
+    prefix="/api/v1",
+    tags=["authentication"]
+)
+
 app.include_router(
     analysis_router,
     prefix="/api/v1",
