@@ -11,6 +11,7 @@ import structlog
 from app.use_cases.analysis.execute_analysis_use_case import ExecuteAnalysisUseCase
 from app.infrastructure.adapters.repositories.mock_query_repository import MockQueryRepository
 from app.infrastructure.adapters.services.mock_analysis_engine import MockAnalysisEngine
+from app.infrastructure.adapters.services.llm_analysis_engine import LLMAnalysisEngine
 from app.infrastructure.adapters.services.mock_user_permissions import MockUserPermissions
 
 logger = structlog.get_logger(__name__)
@@ -42,13 +43,20 @@ class DIContainer:
         """서비스 초기화"""
         try:
             # Infrastructure Layer (가장 바깥쪽)
-            # TODO: 실제 구현체로 교체 예정
             
             # Repositories
             self._query_repository = MockQueryRepository()
             
-            # External Services
-            self._analysis_engine = MockAnalysisEngine()
+            # External Services - 환경에 따라 Mock 또는 실제 LLM 엔진 사용
+            use_llm_engine = self._should_use_llm_engine()
+            
+            if use_llm_engine:
+                self._analysis_engine = LLMAnalysisEngine()
+                logger.info("LLM 분석 엔진 사용")
+            else:
+                self._analysis_engine = MockAnalysisEngine()
+                logger.info("Mock 분석 엔진 사용")
+            
             self._user_permissions = MockUserPermissions()
             
             # Use Cases (Application Layer)
@@ -58,11 +66,26 @@ class DIContainer:
                 user_permissions=self._user_permissions
             )
             
-            logger.info("DI Container 서비스 초기화 완료")
+            logger.info(
+                "DI Container 서비스 초기화 완료",
+                llm_engine_enabled=use_llm_engine
+            )
             
         except Exception as e:
             logger.error("DI Container 초기화 실패", error=str(e))
             raise
+    
+    def _should_use_llm_engine(self) -> bool:
+        """LLM 엔진 사용 여부 결정"""
+        import os
+        
+        # 환경 변수로 제어
+        use_llm = os.getenv("USE_LLM_ENGINE", "false").lower() == "true"
+        
+        # OpenAI API 키가 있는지 확인
+        has_api_key = bool(os.getenv("OPENAI_API_KEY"))
+        
+        return use_llm and has_api_key
     
     def get_execute_analysis_use_case(self) -> ExecuteAnalysisUseCase:
         """분석 실행 Use Case 반환"""
