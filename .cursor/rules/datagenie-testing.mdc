@@ -1,0 +1,493 @@
+---
+globs: tests/**/*.py,app/**/*test*.py
+description: DataGenie 전용 테스트 전략 및 TDD 구현 가이드
+---
+
+# DataGenie 테스트 전략 및 TDD 규칙
+
+## 🧪 DataGenie TDD 컨텍스트
+
+DataGenie는 **Clean Architecture**와 **TDD**를 기반으로 개발됩니다. 모든 프로덕션 코드는 **반드시** 실패하는 테스트가 먼저 작성되어야 합니다.
+
+## ⚡ DataGenie TDD 필수 패턴
+
+### 1. Domain Layer 테스트 (가장 중요)
+```python
+# ✅ REQUIRED: Domain 엔티티 테스트 예시
+import pytest
+from datetime import datetime
+from app.domain.entities.analysis_query import AnalysisQuery, QueryType, QueryStatus
+
+class TestAnalysisQuery:
+    """AnalysisQuery 도메인 엔티티 테스트"""
+    
+    def test_create_valid_analysis_query(self):
+        """RED → GREEN: 유효한 분석 쿼리 생성"""
+        # Arrange
+        query = AnalysisQuery.create(
+            question="지난 3개월 매출 추이를 보여주세요",
+            user_id="user-123",
+            query_type="database"
+        )
+        
+        # Act & Assert
+        assert query.is_valid() == True
+        assert query.question == "지난 3개월 매출 추이를 보여주세요"
+        assert query.query_type == QueryType.DATABASE
+        assert query.status == QueryStatus.PENDING
+        assert query.can_be_executed_by("user-123") == True
+    
+    def test_invalid_query_empty_question(self):
+        """RED → GREEN: 빈 질문 검증"""
+        # Arrange & Act
+        query = AnalysisQuery.create(
+            question="",
+            user_id="user-123", 
+            query_type="database"
+        )
+        
+        # Assert
+        assert query.is_valid() == False
+    
+    def test_invalid_query_too_long(self):
+        """RED → GREEN: 너무 긴 질문 검증"""
+        # Arrange
+        long_question = "A" * 1001  # 1000자 초과
+        
+        # Act
+        query = AnalysisQuery.create(
+            question=long_question,
+            user_id="user-123",
+            query_type="database"
+        )
+        
+        # Assert
+        assert query.is_valid() == False
+    
+    @pytest.mark.parametrize("user_id,expected", [
+        ("user-123", True),   # 같은 사용자
+        ("user-456", False),  # 다른 사용자
+    ])
+    def test_execution_permission(self, user_id, expected):
+        """RED → GREEN: 실행 권한 검증"""
+        # Arrange
+        query = AnalysisQuery.create(
+            question="테스트 질문",
+            user_id="user-123",
+            query_type="database"
+        )
+        
+        # Act & Assert
+        assert query.can_be_executed_by(user_id) == expected
+```
+
+### 2. Use Case Layer 테스트
+```python
+# ✅ REQUIRED: Use Case 테스트 예시
+import pytest
+from unittest.mock import Mock, AsyncMock
+from app.use_cases.analysis.execute_analysis_use_case import (
+    ExecuteAnalysisUseCase,
+    AnalysisRequest,
+    PermissionDeniedError,
+    InvalidQueryError
+)
+
+class TestExecuteAnalysisUseCase:
+    """ExecuteAnalysisUseCase 테스트"""
+    
+    @pytest.fixture
+    def mock_dependencies(self):
+        """의존성 Mock 설정"""
+        return {
+            "query_repository": AsyncMock(),
+            "analysis_engine": AsyncMock(),
+            "user_permissions": AsyncMock()
+        }
+    
+    @pytest.fixture
+    def use_case(self, mock_dependencies):
+        """테스트 대상 Use Case"""
+        return ExecuteAnalysisUseCase(**mock_dependencies)
+    
+    @pytest.mark.asyncio
+    async def test_successful_analysis_execution(self, use_case, mock_dependencies):
+        """RED → GREEN: 성공적인 분석 실행"""
+        # Arrange
+        request = AnalysisRequest(
+            question="매출 데이터를 보여주세요",
+            user_id="user-123",
+            query_type="database"
+        )
+        
+        # Mock 설정
+        mock_dependencies["user_permissions"].can_execute_analysis.return_value = True
+        mock_dependencies["analysis_engine"].execute_analysis.return_value = Mock(
+            success=True,
+            data={"result": "mock_data"}
+        )
+        
+        # Act
+        result = await use_case.execute(request, "user-123")
+        
+        # Assert
+        assert result.success == True
+        mock_dependencies["user_permissions"].can_execute_analysis.assert_called_once_with("user-123")
+        mock_dependencies["query_repository"].save.assert_called_once()
+    
+    @pytest.mark.asyncio
+    async def test_permission_denied_error(self, use_case, mock_dependencies):
+        """RED → GREEN: 권한 거부 에러"""
+        # Arrange
+        request = AnalysisRequest(
+            question="매출 데이터를 보여주세요",
+            user_id="user-123",
+            query_type="database"
+        )
+        
+        # Mock 설정 - 권한 없음
+        mock_dependencies["user_permissions"].can_execute_analysis.return_value = False
+        
+        # Act & Assert
+        with pytest.raises(PermissionDeniedError, match="분석 실행 권한이 없습니다"):
+            await use_case.execute(request, "user-123")
+        
+        # Repository 호출되지 않았는지 확인
+        mock_dependencies["query_repository"].save.assert_not_called()
+    
+    @pytest.mark.asyncio
+    async def test_invalid_query_error(self, use_case, mock_dependencies):
+        """RED → GREEN: 유효하지 않은 쿼리 에러"""
+        # Arrange
+        request = AnalysisRequest(
+            question="",  # 빈 질문
+            user_id="user-123",
+            query_type="database"
+        )
+        
+        # Mock 설정
+        mock_dependencies["user_permissions"].can_execute_analysis.return_value = True
+        
+        # Act & Assert
+        with pytest.raises(InvalidQueryError, match="유효하지 않은 질문입니다"):
+            await use_case.execute(request, "user-123")
+```
+
+### 3. API Layer 테스트
+```python
+# ✅ REQUIRED: API 엔드포인트 테스트
+import pytest
+from fastapi.testclient import TestClient
+from unittest.mock import AsyncMock, patch
+from app.main import app
+
+class TestAnalysisAPI:
+    """분석 API 엔드포인트 테스트"""
+    
+    @pytest.fixture
+    def client(self):
+        """테스트 클라이언트"""
+        return TestClient(app)
+    
+    @pytest.fixture
+    def mock_use_case(self):
+        """Use Case Mock"""
+        return AsyncMock()
+    
+    def test_execute_analysis_success(self, client, mock_use_case):
+        """RED → GREEN: 분석 실행 성공"""
+        # Arrange
+        request_data = {
+            "question": "지난 달 매출을 보여주세요",
+            "connection_id": "conn-123",
+            "options": {"auto_visualize": True}
+        }
+        
+        mock_result = Mock(
+            success=True,
+            data={"sql": "SELECT * FROM sales", "result": []}
+        )
+        mock_use_case.execute.return_value = mock_result
+        
+        # Mock 의존성 주입
+        with patch('app.api.dependencies.get_execute_analysis_use_case', return_value=mock_use_case), \
+             patch('app.api.dependencies.get_current_user', return_value={"id": "user-123"}):
+            
+            # Act
+            response = client.post(
+                "/api/v1/analysis/execute",
+                json=request_data,
+                headers={"Authorization": "Bearer dummy-token"}
+            )
+        
+        # Assert
+        assert response.status_code == 200
+        response_data = response.json()
+        assert response_data["success"] == True
+        assert "data" in response_data
+    
+    def test_execute_analysis_unauthorized(self, client):
+        """RED → GREEN: 인증되지 않은 요청"""
+        # Arrange
+        request_data = {
+            "question": "매출 데이터를 보여주세요"
+        }
+        
+        # Act - Authorization 헤더 없이 요청
+        response = client.post("/api/v1/analysis/execute", json=request_data)
+        
+        # Assert
+        assert response.status_code == 403  # Forbidden
+    
+    def test_execute_analysis_invalid_request(self, client):
+        """RED → GREEN: 유효하지 않은 요청"""
+        # Arrange
+        invalid_request = {
+            "question": "",  # 빈 질문
+        }
+        
+        with patch('app.api.dependencies.get_current_user', return_value={"id": "user-123"}):
+            # Act
+            response = client.post(
+                "/api/v1/analysis/execute",
+                json=invalid_request,
+                headers={"Authorization": "Bearer dummy-token"}
+            )
+        
+        # Assert
+        assert response.status_code == 422  # Validation Error
+```
+
+### 4. Infrastructure Layer 테스트
+```python
+# ✅ REQUIRED: Repository 구현체 테스트
+import pytest
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+from app.infrastructure.adapters.repositories.sqlalchemy_query_repository import SqlAlchemyQueryRepository
+from app.domain.entities.analysis_query import AnalysisQuery
+from app.models.base import Base
+
+class TestSqlAlchemyQueryRepository:
+    """SQLAlchemy Repository 구현체 테스트"""
+    
+    @pytest.fixture
+    async def test_db_session(self):
+        """테스트 데이터베이스 세션"""
+        # 메모리 SQLite 사용
+        engine = create_async_engine("sqlite+aiosqlite:///:memory:")
+        
+        # 테이블 생성
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        
+        # 세션 생성
+        async_session = async_sessionmaker(engine)
+        async with async_session() as session:
+            yield session
+        
+        await engine.dispose()
+    
+    @pytest.mark.asyncio
+    async def test_save_and_find_query(self, test_db_session):
+        """RED → GREEN: 쿼리 저장 및 조회"""
+        # Arrange
+        repository = SqlAlchemyQueryRepository(test_db_session)
+        query = AnalysisQuery.create(
+            question="테스트 질문",
+            user_id="user-123",
+            query_type="database"
+        )
+        
+        # Act
+        await repository.save(query)
+        found_query = await repository.find_by_id(query.id)
+        
+        # Assert
+        assert found_query is not None
+        assert found_query.id == query.id
+        assert found_query.question == "테스트 질문"
+        assert found_query.user_id == "user-123"
+    
+    @pytest.mark.asyncio
+    async def test_find_by_user_id(self, test_db_session):
+        """RED → GREEN: 사용자별 쿼리 조회"""
+        # Arrange
+        repository = SqlAlchemyQueryRepository(test_db_session)
+        
+        # 여러 쿼리 저장
+        query1 = AnalysisQuery.create("질문1", "user-123", "database")
+        query2 = AnalysisQuery.create("질문2", "user-123", "excel")
+        query3 = AnalysisQuery.create("질문3", "user-456", "database")
+        
+        await repository.save(query1)
+        await repository.save(query2)
+        await repository.save(query3)
+        
+        # Act
+        user_queries = await repository.find_by_user_id("user-123")
+        
+        # Assert
+        assert len(user_queries) == 2
+        assert all(q.user_id == "user-123" for q in user_queries)
+```
+
+## 🧪 DataGenie 전용 테스트 유틸리티
+
+### 1. 테스트 픽스처
+```python
+# ✅ REQUIRED: DataGenie 공통 테스트 픽스처
+import pytest
+from datetime import datetime
+from app.domain.entities.analysis_query import AnalysisQuery
+
+@pytest.fixture
+def sample_analysis_query():
+    """샘플 분석 쿼리"""
+    return AnalysisQuery.create(
+        question="지난 달 매출 추이를 보여주세요",
+        user_id="test-user-123",
+        query_type="database"
+    )
+
+@pytest.fixture
+def sample_analysis_request():
+    """샘플 분석 요청"""
+    from app.use_cases.analysis.execute_analysis_use_case import AnalysisRequest
+    return AnalysisRequest(
+        question="매출 데이터 분석",
+        user_id="test-user-123",
+        query_type="database",
+        connection_id="test-conn-123"
+    )
+
+@pytest.fixture
+def mock_analysis_result():
+    """Mock 분석 결과"""
+    from app.domain.value_objects.analysis_result import AnalysisResult
+    return AnalysisResult(
+        analysis_type="database",
+        question="테스트 질문",
+        sql_query="SELECT * FROM test_table",
+        data=[{"id": 1, "name": "test"}],
+        columns=["id", "name"],
+        row_count=1,
+        summary="테스트 결과입니다"
+    )
+```
+
+### 2. 테스트 헬퍼
+```python
+# ✅ REQUIRED: DataGenie 테스트 헬퍼 함수
+class DataGenieTestHelpers:
+    """DataGenie 전용 테스트 헬퍼"""
+    
+    @staticmethod
+    def create_test_user(user_id: str = "test-user") -> dict:
+        """테스트 사용자 생성"""
+        return {
+            "id": user_id,
+            "username": f"{user_id}_name",
+            "email": f"{user_id}@test.com",
+            "is_active": True
+        }
+    
+    @staticmethod
+    def create_test_schema() -> dict:
+        """테스트 데이터베이스 스키마"""
+        return {
+            "users": {
+                "columns": [
+                    {"name": "id", "type": "integer", "primary_key": True},
+                    {"name": "name", "type": "varchar"},
+                    {"name": "email", "type": "varchar"}
+                ]
+            },
+            "orders": {
+                "columns": [
+                    {"name": "id", "type": "integer", "primary_key": True},
+                    {"name": "user_id", "type": "integer", "foreign_key": "users.id"},
+                    {"name": "amount", "type": "decimal"},
+                    {"name": "created_at", "type": "timestamp"}
+                ]
+            }
+        }
+    
+    @staticmethod
+    def assert_valid_analysis_result(result):
+        """분석 결과 유효성 검증"""
+        assert hasattr(result, 'success')
+        assert hasattr(result, 'data')
+        if result.success:
+            assert result.data is not None
+```
+
+## 🚫 DataGenie 테스트 안티패턴
+
+### 1. 금지된 테스트 패턴
+```python
+# 🚫 FORBIDDEN: 구현 세부사항 테스트
+def test_internal_method_calls():
+    """BAD: 내부 메서드 호출 테스트"""
+    service = AnalysisService()
+    with patch.object(service, '_internal_helper') as mock:
+        service.analyze("question")
+        mock.assert_called_once()  # 구현 세부사항 테스트!
+
+# 🚫 FORBIDDEN: 테스트 후 코드 작성
+def test_existing_functionality():
+    """BAD: 이미 존재하는 기능에 대한 테스트"""
+    result = existing_function()
+    assert result == "current_output"  # 의미 없는 테스트!
+
+# 🚫 FORBIDDEN: 과도한 Mock 사용
+def test_with_too_many_mocks():
+    """BAD: 너무 많은 Mock으로 의미 없는 테스트"""
+    with patch('module.A') as mock_a, \
+         patch('module.B') as mock_b, \
+         patch('module.C') as mock_c:
+        result = service.do_something()
+        assert result == mock_a.return_value  # 의미 없음
+```
+
+## 📋 DataGenie TDD 체크리스트
+
+### Red Phase (실패 테스트)
+- [ ] ✅ 프로덕션 코드 작성 전 테스트 작성
+- [ ] ✅ 올바른 이유로 테스트 실패
+- [ ] ✅ 명확한 동작 설명
+- [ ] ✅ 최소한이고 집중된 테스트
+- [ ] ✅ 예상대로 실행되고 실패
+
+### Green Phase (통과 코드)
+- [ ] ✅ 테스트 통과를 위한 최소 코드
+- [ ] ✅ 추가 기능 구현 안 함
+- [ ] ✅ 모든 테스트 통과
+- [ ] ✅ 완벽하지 않아도 동작
+- [ ] ✅ 테스트를 초록색으로 만드는 데 집중
+
+### Refactor Phase (리팩터링)
+- [ ] ✅ 코드 구조 개선
+- [ ] ✅ 중복 제거
+- [ ] ✅ 이름 명확화
+- [ ] ✅ 모든 테스트 여전히 통과
+- [ ] ✅ 동작 변경 없음
+
+## 🎯 DataGenie 테스트 품질 목표
+
+### 커버리지 목표
+- **Domain Layer**: 100% 라인 커버리지
+- **Use Cases Layer**: 100% 라인 커버리지
+- **API Layer**: 95% 라인 커버리지
+- **Infrastructure Layer**: 90% 라인 커버리지
+
+### 성능 목표
+- **단위 테스트**: < 1초 각각
+- **통합 테스트**: < 5초 각각
+- **전체 테스트 스위트**: < 30초
+
+### 품질 메트릭
+- **테스트 대 코드 비율**: 2:1 이상
+- **어설션 밀도**: 테스트당 3-5개 어설션
+- **Mock 사용률**: 테스트의 30% 미만
+
+Remember: **TDD는 테스트가 아닌 설계에 관한 것입니다.** 테스트가 어렵다면 설계가 잘못된 것입니다. TDD는 처음부터 테스트 가능하고, 분리되고, 유지보수 가능한 코드를 작성하도록 강제합니다.

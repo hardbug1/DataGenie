@@ -1,5 +1,5 @@
 ---
-alwaysApply: true
+globs: **/*.py,**/*.yml,**/*.md,requirements/**/*.txt
 description: DataGenie project structure and architecture guidelines
 ---
 
@@ -13,28 +13,52 @@ You are working on **DataGenie**, an LLM-based data analysis and visualization s
 - **Cache**: Redis
 - **AI**: OpenAI GPT-4 integration
 
-## 📁 MANDATORY DIRECTORY STRUCTURE
+## 📁 MANDATORY DIRECTORY STRUCTURE (현재 구현 상태)
 ```
 datagenie/
 ├── app/                    # Main application code
-│   ├── main.py            # FastAPI entry point
-│   ├── config/            # Configuration management
-│   ├── models/            # SQLAlchemy database models
-│   ├── schemas/           # Pydantic schemas
-│   ├── api/v1/           # API endpoints
-│   ├── core/             # Core business logic
+│   ├── main.py            # FastAPI entry point ✅ 구현됨
+│   ├── config/            # Configuration management ✅ 구현됨
+│   │   ├── settings.py    # 환경 설정
+│   │   ├── database.py    # 데이터베이스 설정
+│   │   └── logging.py     # 로깅 설정 ✅ 구현됨
+│   ├── domain/            # Clean Architecture - Domain 계층 ✅ 구현됨
+│   │   ├── entities/      # 비즈니스 엔티티
+│   │   ├── value_objects/ # 값 객체
+│   │   └── interfaces/    # 도메인 인터페이스
+│   ├── use_cases/         # Clean Architecture - Use Cases 계층 ✅ 구현됨
+│   │   └── analysis/      # 분석 유스케이스
+│   ├── infrastructure/    # Clean Architecture - Infrastructure 계층 ✅ 구현됨
+│   │   ├── adapters/      # 어댑터 구현
+│   │   └── di_container.py # 의존성 주입 컨테이너
+│   ├── api/              # API 계층 ✅ 구현됨
+│   │   ├── v1/           # API v1 엔드포인트
+│   │   └── dependencies.py # API 의존성
+│   ├── schemas/          # Pydantic schemas ✅ 구현됨
+│   │   └── analysis.py   # 분석 스키마
+│   ├── models/           # SQLAlchemy database models ✅ 기존 구현
+│   │   ├── user.py       # 사용자 모델
+│   │   └── database_connection.py # DB 연결 모델
+│   ├── core/             # Core business logic (향후 구현)
 │   │   ├── nlp/          # Natural language processing
 │   │   ├── query/        # Database query engine
 │   │   ├── excel/        # Excel analysis engine
 │   │   └── visualization/ # Chart generation
-│   ├── auth/             # Authentication & authorization
-│   ├── cache/            # Redis caching logic
-│   └── utils/            # Utility functions
-├── docs/                  # Project documentation
-├── tests/                # Test files (mirror app structure)
-├── scripts/              # Database migrations & utilities
-├── requirements/         # Dependency management
-└── docker/              # Docker configurations
+│   ├── auth/             # Authentication & authorization (향후 구현)
+│   ├── cache/            # Redis caching logic (향후 구현)
+│   └── utils/            # Utility functions (향후 구현)
+├── docs/                 # Project documentation ✅ 완성
+│   ├── system_architecture.md
+│   ├── functional_requirements.md
+│   ├── api_specification.md
+│   ├── database_design.md
+│   └── development_checklist.md
+├── tests/                # Test files (향후 구현)
+├── scripts/              # Database migrations & utilities (향후 구현)
+├── requirements/         # Dependency management ✅ 구현됨
+│   └── base.txt         # 기본 의존성
+└── docker/              # Docker configurations ✅ 구현됨
+    └── docker-compose.yml
 ```
 
 ## ⚡ ABSOLUTE MUST-DO RULES
@@ -83,19 +107,27 @@ datagenie/
 
 ## 🔄 WORKFLOW PATTERNS
 
-### Request Processing Flow
+### Request Processing Flow (Clean Architecture 기반)
 ```
-User Input → Validation → NLP Analysis → Route Decision
-     ↓
-[DB Query Path]           [Excel Analysis Path]
-     ↓                         ↓
-SQL Generation           Code Generation
-     ↓                         ↓
-Query Execution         Safe Execution
-     ↓                         ↓
-     └────→ Visualization ←────┘
+User Input → API Layer (FastAPI) → Use Case Layer → Domain Layer
+     ↓                                    ↓              ↓
+HTTP Request → AnalysisRequest → ExecuteAnalysisUseCase → AnalysisQuery Entity
+     ↓                                    ↓              ↓
+Validation → Pydantic Schema → Business Logic → Domain Rules
+     ↓                                    ↓              ↓
+Route Decision → Analysis Engine Interface → Repository Interface
+     ↓                                    ↓              ↓
+[DB Query Path]           [Excel Analysis Path]    Infrastructure Layer
+     ↓                         ↓                         ↓
+SQL Generation           Code Generation          Adapter Implementation
+     ↓                         ↓                         ↓
+Query Execution         Safe Execution           External Services
+     ↓                         ↓                         ↓
+     └────→ Visualization ←────┘                Infrastructure
+             ↓                                        ↓
+         Response Generation ← AnalysisResult ← Value Object
              ↓
-         Response Generation
+         HTTP Response
 ```
 
 ### Error Handling Strategy
@@ -124,4 +156,24 @@ Query Execution         Safe Execution
 - Zero security vulnerabilities
 - 90%+ query success rate
 
-Remember: This is a production system handling sensitive data. Every decision must prioritize security, performance, and user experience.
+## 📊 현재 프로젝트 진행 상황
+
+### ✅ 완료된 Phase
+- **Phase 1**: 프로젝트 초기 설정 (100% 완료)
+- **Phase 2**: 백엔드 기본 구조 (100% 완료)
+- **Phase 2.5**: Clean Architecture 구현 (100% 완료)
+
+### 🔄 다음 단계 (Phase 3: 핵심 분석 엔진)
+1. **OpenAI LLM 통합** - GPT-4 API 연동
+2. **자연어 처리 모듈** - 질문 분석 및 분류
+3. **SQL 생성 엔진** - LangChain SQL Agent
+4. **Excel 분석 엔진** - Pandas 기반 분석
+5. **시각화 엔진** - Plotly 차트 생성
+
+### 🏗️ 구현된 Clean Architecture 컴포넌트
+- ✅ **Domain Layer**: 엔티티, 값 객체, 인터페이스
+- ✅ **Use Cases Layer**: ExecuteAnalysisUseCase
+- ✅ **Infrastructure Layer**: DI 컨테이너, Mock 어댑터
+- ✅ **API Layer**: 분석 엔드포인트, 스키마 검증
+
+Remember: This is a production system handling sensitive data. Every decision must prioritize security, performance, and user experience. Clean Architecture 원칙을 준수하여 유지보수 가능하고 테스트 가능한 코드를 작성하세요.

@@ -1,5 +1,5 @@
 ---
-alwaysApply: true
+globs: app/domain/**/*.py,app/use_cases/**/*.py,app/infrastructure/**/*.py,app/api/**/*.py
 description: Clean Architecture principles and layer separation for DataGenie
 ---
 
@@ -17,22 +17,31 @@ You are implementing **Clean Architecture** in DataGenie to ensure maintainable,
 app/
 ├── domain/                 # Enterprise Business Rules (innermost)
 │   ├── entities/          # Core business entities
+│   │   └── analysis_query.py  # AnalysisQuery 엔티티 (구현됨)
 │   ├── value_objects/     # Immutable value objects
+│   │   └── analysis_result.py # AnalysisResult 값 객체 (구현됨)
 │   └── interfaces/        # Domain service interfaces
+│       ├── repositories/  # Repository 인터페이스 (구현됨)
+│       └── services/      # Service 인터페이스 (구현됨)
 ├── use_cases/             # Application Business Rules
-│   ├── analysis/          # Analysis use cases
+│   ├── analysis/          # Analysis use cases (구현됨)
+│   │   └── execute_analysis_use_case.py
 │   ├── auth/              # Authentication use cases
 │   └── data_management/   # Data management use cases
-├── adapters/              # Interface Adapters
-│   ├── repositories/      # Data access implementations
-│   ├── external_services/ # External API adapters
-│   └── presenters/        # Output formatters
 ├── infrastructure/        # Frameworks & Drivers (outermost)
-│   ├── database/          # Database implementations
-│   ├── web/               # FastAPI controllers
-│   ├── cache/             # Redis implementations
-│   └── external_apis/     # LLM, external DB clients
-└── main.py               # Composition root
+│   ├── adapters/          # Interface Adapters (구현됨)
+│   │   ├── repositories/  # Data access implementations
+│   │   └── services/      # External service adapters
+│   └── di_container.py    # 의존성 주입 컨테이너 (구현됨)
+├── api/                   # API 계층 (구현됨)
+│   ├── v1/               # API v1 엔드포인트
+│   │   └── analysis.py   # 분석 API 엔드포인트 (구현됨)
+│   └── dependencies.py   # API 의존성 (구현됨)
+├── schemas/              # Pydantic 스키마 (구현됨)
+│   └── analysis.py      # 분석 관련 스키마
+├── models/               # SQLAlchemy 모델 (기존)
+├── config/               # 설정 관리 (기존)
+└── main.py              # Composition root (업데이트됨)
 ```
 
 ## ⚡ DEPENDENCY RULE ENFORCEMENT

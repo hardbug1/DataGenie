@@ -1,0 +1,469 @@
+---
+globs: app/core/nlp/*.py,app/use_cases/analysis/*.py,app/infrastructure/adapters/services/*analysis*.py
+description: DataGenie LLM 프롬프트 엔지니어링 및 통합 규칙
+---
+
+# DataGenie LLM 프롬프트 엔지니어링 규칙
+
+## 🤖 LLM 통합 컨텍스트
+
+DataGenie에서 **OpenAI GPT-4**를 사용하여 자연어를 SQL/Python 코드로 변환합니다. 모든 프롬프트는 **정확성과 보안**을 최우선으로 설계되어야 합니다.
+
+## ⚡ 필수 프롬프트 템플릿
+
+### 1. SQL 생성 프롬프트 (MANDATORY)
+```python
+# ✅ REQUIRED: DataGenie SQL 생성 전용 프롬프트
+SQL_GENERATION_PROMPT = PromptTemplate(
+    input_variables=["question", "schema_info", "examples"],
+    template="""
+당신은 DataGenie의 전문 SQL 분석가입니다.
+
+중요 규칙:
+- SELECT 쿼리만 생성 (INSERT/UPDATE/DELETE/DROP 금지)
+- 매개변수화된 쿼리로 SQL 인젝션 방지
+- 결과를 최대 1000행으로 제한
+- PostgreSQL/MySQL 호환 문법 사용
+- 개인정보 자동 마스킹 고려
+
+데이터베이스 스키마:
+{schema_info}
+
+예시 쿼리:
+{examples}
+
+사용자 질문: {question}
+
+응답 형식 (JSON):
+{{
+    "sql": "SELECT 컬럼1, 컬럼2 FROM 테이블 WHERE 조건 LIMIT 1000",
+    "explanation": "쿼리가 수행하는 작업에 대한 간단한 설명",
+    "estimated_rows": 150,
+    "confidence": 0.95,
+    "warnings": ["잠재적 문제나 제한사항"],
+    "tables_used": ["테이블1", "테이블2"],
+    "requires_join": false
+}}
+
+SQL 쿼리:
+"""
+)
+
+# ✅ REQUIRED: Excel 분석 프롬프트
+EXCEL_ANALYSIS_PROMPT = PromptTemplate(
+    input_variables=["question", "dataframe_info", "sample_data"],
+    template="""
+당신은 DataGenie의 전문 Python 데이터 분석가입니다.
+
+중요 규칙:
+- 안전한 pandas 연산만 생성
+- 파일 시스템 접근 금지 (open(), read_csv() 경로 사용 금지)
+- 네트워크 요청 금지 (requests, urllib 금지)
+- 서브프로세스나 시스템 호출 금지
+- 제공된 'df' 데이터프레임만 사용
+- 적절한 에러 처리 포함
+
+데이터프레임 정보:
+{dataframe_info}
+
+샘플 데이터:
+{sample_data}
+
+사용자 질문: {question}
+
+응답 형식 (JSON):
+{{
+    "code": "# Python pandas 코드",
+    "explanation": "분석이 수행하는 작업",
+    "expected_output": "예상 결과에 대한 설명",
+    "confidence": 0.92,
+    "safety_check": "confirmed_safe",
+    "visualization_type": "bar_chart|line_chart|scatter|table|none"
+}}
+
+Python 코드:
+"""
+)
+```
+
+### 2. 안전한 LLM 호출 패턴
+```python
+# ✅ MANDATORY: 모든 LLM 상호작용에 사용할 패턴
+class DataGenieLLMProcessor:
+    """DataGenie 전용 LLM 프로세서"""
+    
+    def __init__(self):
+        self.llm = ChatOpenAI(
+            model="gpt-4",
+            temperature=0.0,  # 결정적 출력
+            max_tokens=2000,  # 토큰 제한
+            timeout=30,       # 타임아웃 설정
+            max_retries=2     # 재시도 횟수
+        )
+        self.safety_validator = DataGenieSafetyValidator()
+        self.cache = DataGenieLLMCache()
+    
+    async def generate_sql_analysis(
+        self, 
+        question: str, 
+        schema_info: Dict[str, Any],
+        user_context: Optional[Dict] = None
+    ) -> SQLAnalysisResult:
+        """SQL 분석 생성"""
+        
+        # 1. 입력 검증
+        if not question.strip():
+            raise ValueError("질문이 비어있습니다")
+        
+        if len(question) > 1000:
+            raise ValueError("질문이 너무 깁니다")
+        
+        # 2. 보안 검사
+        if self.safety_validator.contains_unsafe_content(question):
+            raise SecurityError("안전하지 않은 내용이 감지되었습니다")
+        
+        # 3. 캐시 확인
+        cache_key = self._generate_cache_key(question, schema_info)
+        cached_result = await self.cache.get(cache_key)
+        if cached_result:
+            return cached_result
+        
+        # 4. 프롬프트 구성
+        examples = self._get_relevant_examples(question, schema_info)
+        prompt = SQL_GENERATION_PROMPT.format(
+            question=question,
+            schema_info=self._format_schema_info(schema_info),
+            examples=examples
+        )
+        
+        # 5. LLM 호출
+        try:
+            response = await self.llm.ainvoke(prompt)
+            result = self._parse_sql_response(response.content)
+            
+            # 6. 출력 검증
+            self.safety_validator.validate_generated_sql(result.sql)
+            
+            # 7. 캐시 저장
+            await self.cache.set(cache_key, result)
+            
+            return result
+            
+        except Exception as e:
+            logger.error(
+                "LLM SQL 생성 실패",
+                extra={
+                    "question_hash": hashlib.sha256(question.encode()).hexdigest()[:16],
+                    "error": str(e)
+                }
+            )
+            raise LLMProcessingError("SQL 쿼리 생성에 실패했습니다")
+```
+
+## 🚫 절대 금지 사항
+
+### 1. 위험한 연산 금지
+```python
+# 🚫 FORBIDDEN: 위험한 SQL 연산
+FORBIDDEN_SQL_KEYWORDS = [
+    "INSERT", "UPDATE", "DELETE", "DROP", "CREATE", "ALTER",
+    "TRUNCATE", "EXEC", "EXECUTE", "CALL", "GRANT", "REVOKE",
+    "COMMIT", "ROLLBACK", "SAVEPOINT", "MERGE", "REPLACE"
+]
+
+# 🚫 FORBIDDEN: 위험한 Python 패턴
+FORBIDDEN_PYTHON_PATTERNS = [
+    r'import\s+(os|sys|subprocess|shutil)',
+    r'exec\s*\(',
+    r'eval\s*\(',
+    r'open\s*\(',
+    r'__import__',
+    r'compile\s*\(',
+    r'globals\s*\(',
+    r'locals\s*\(',
+]
+
+# 🚫 NEVER: LLM 출력을 검증 없이 실행
+def unsafe_execution(llm_output):
+    exec(llm_output)  # 절대 금지!
+```
+
+### 2. 프롬프트 인젝션 방지
+```python
+# ✅ REQUIRED: 프롬프트 인젝션 탐지
+class DataGeniePromptInjectionDetector:
+    """DataGenie 전용 프롬프트 인젝션 탐지기"""
+    
+    INJECTION_PATTERNS = [
+        r'이전\s*지시사항을?\s*무시',
+        r'위의?\s*모든?\s*것을?\s*잊어',
+        r'새로운?\s*지시사항?:',
+        r'시스템\s*:',
+        r'어시스턴트\s*:',
+        r'사용자\s*:',
+        r'중요\s*규칙?:',
+        r'응답\s*형식',
+        r'```.*?```',  # 입력의 코드 블록
+    ]
+    
+    def detect_injection(self, user_input: str) -> bool:
+        """사용자 입력에서 프롬프트 인젝션 탐지"""
+        for pattern in self.INJECTION_PATTERNS:
+            if re.search(pattern, user_input, re.IGNORECASE):
+                logger.warning(
+                    "프롬프트 인젝션 시도 감지",
+                    extra={"input_hash": hashlib.sha256(user_input.encode()).hexdigest()[:16]}
+                )
+                return True
+        return False
+```
+
+## 🎯 성능 최적화
+
+### 1. 지능형 캐싱
+```python
+# ✅ REQUIRED: DataGenie LLM 캐싱 시스템
+class DataGenieLLMCache:
+    """DataGenie 전용 LLM 캐싱"""
+    
+    def __init__(self, redis_client):
+        self.redis = redis_client
+        self.ttl = 3600 * 24  # 24시간
+    
+    async def get(self, cache_key: str) -> Optional[Dict]:
+        """캐시에서 응답 조회"""
+        try:
+            cached = await self.redis.get(f"datagenie:llm:{cache_key}")
+            if cached:
+                return json.loads(cached)
+        except Exception as e:
+            logger.warning(f"캐시 조회 실패: {e}")
+        return None
+    
+    async def set(self, cache_key: str, response: Dict):
+        """캐시에 응답 저장"""
+        try:
+            await self.redis.setex(
+                f"datagenie:llm:{cache_key}",
+                self.ttl,
+                json.dumps(response, ensure_ascii=False)
+            )
+        except Exception as e:
+            logger.warning(f"캐시 저장 실패: {e}")
+    
+    def generate_cache_key(self, question: str, schema_hash: str) -> str:
+        """캐시 키 생성"""
+        content = f"{question}:{schema_hash}"
+        return hashlib.sha256(content.encode()).hexdigest()
+```
+
+### 2. 토큰 사용량 최적화
+```python
+# ✅ REQUIRED: DataGenie 토큰 최적화
+class DataGenieTokenOptimizer:
+    """DataGenie 전용 토큰 최적화"""
+    
+    def __init__(self):
+        self.encoding = tiktoken.encoding_for_model("gpt-4")
+    
+    def optimize_schema_info(self, schema: Dict) -> str:
+        """스키마 정보 최적화"""
+        optimized = []
+        for table_name, table_info in schema.items():
+            # 중요한 컬럼만 포함
+            important_columns = []
+            for col in table_info.get('columns', []):
+                col_desc = f"{col['name']}({col['type']})"
+                if col.get('primary_key'):
+                    col_desc += "*PK"
+                if col.get('foreign_key'):
+                    col_desc += "*FK"
+                important_columns.append(col_desc)
+            
+            # 테이블당 최대 10개 컬럼만 표시
+            if len(important_columns) > 10:
+                important_columns = important_columns[:10] + ["..."]
+            
+            optimized.append(f"{table_name}: {', '.join(important_columns)}")
+        
+        return "\n".join(optimized)
+    
+    def get_relevant_examples(self, question: str, max_examples: int = 3) -> List[str]:
+        """관련성 높은 예시만 선택"""
+        # 질문 키워드 기반으로 관련 예시 필터링
+        question_keywords = set(question.lower().split())
+        
+        scored_examples = []
+        for example in self.example_database:
+            example_keywords = set(example['question'].lower().split())
+            relevance_score = len(question_keywords & example_keywords)
+            scored_examples.append((relevance_score, example))
+        
+        # 관련성 순으로 정렬하여 상위 N개 반환
+        scored_examples.sort(key=lambda x: x[0], reverse=True)
+        return [ex[1]['sql'] for ex in scored_examples[:max_examples]]
+```
+
+## 🔍 품질 보증
+
+### 1. LLM 출력 검증
+```python
+# ✅ REQUIRED: DataGenie LLM 출력 검증
+class DataGenieLLMValidator:
+    """DataGenie 전용 LLM 출력 검증"""
+    
+    def validate_sql_output(self, sql: str, schema: Dict) -> ValidationResult:
+        """SQL 출력 검증"""
+        try:
+            # 1. 구문 검사
+            parsed = sqlparse.parse(sql)[0]
+            
+            # 2. 금지된 키워드 검사
+            for token in parsed.flatten():
+                if token.ttype is Keyword and token.value.upper() in FORBIDDEN_SQL_KEYWORDS:
+                    return ValidationResult(
+                        valid=False, 
+                        error=f"금지된 SQL 키워드: {token.value}"
+                    )
+            
+            # 3. SELECT 문인지 확인
+            first_token = next(token for token in parsed.flatten() if not token.is_whitespace)
+            if first_token.value.upper() != "SELECT":
+                return ValidationResult(
+                    valid=False,
+                    error="SELECT 문만 허용됩니다"
+                )
+            
+            # 4. 테이블 존재 여부 확인
+            referenced_tables = self._extract_table_names(sql)
+            schema_tables = set(schema.keys())
+            unknown_tables = referenced_tables - schema_tables
+            if unknown_tables:
+                return ValidationResult(
+                    valid=False,
+                    error=f"존재하지 않는 테이블: {', '.join(unknown_tables)}"
+                )
+            
+            # 5. LIMIT 절 확인
+            if "LIMIT" not in sql.upper():
+                sql = sql.rstrip(';') + " LIMIT 1000"
+            
+            return ValidationResult(valid=True, validated_sql=sql)
+            
+        except Exception as e:
+            return ValidationResult(
+                valid=False,
+                error=f"SQL 검증 실패: {str(e)}"
+            )
+```
+
+### 2. 신뢰도 평가
+```python
+# ✅ REQUIRED: DataGenie 신뢰도 평가
+class DataGenieConfidenceAssessor:
+    """DataGenie 전용 신뢰도 평가"""
+    
+    def assess_sql_confidence(self, question: str, sql: str, schema: Dict) -> float:
+        """SQL 생성 신뢰도 계산"""
+        confidence = 1.0
+        
+        # 질문 복잡도에 따른 신뢰도 조정
+        question_words = len(question.split())
+        if question_words > 20:
+            confidence *= 0.9
+        elif question_words > 30:
+            confidence *= 0.8
+        
+        # SQL 복잡도에 따른 신뢰도 조정
+        join_count = sql.upper().count('JOIN')
+        if join_count > 2:
+            confidence *= 0.8
+        elif join_count > 4:
+            confidence *= 0.6
+        
+        # 서브쿼리 개수에 따른 조정
+        subquery_count = sql.count('(SELECT')
+        if subquery_count > 1:
+            confidence *= 0.9
+        
+        # 스키마 매칭도에 따른 조정
+        referenced_tables = self._extract_table_names(sql)
+        schema_tables = set(schema.keys())
+        if not referenced_tables.issubset(schema_tables):
+            confidence *= 0.5
+        
+        return max(0.1, confidence)  # 최소 10% 신뢰도
+    
+    def should_proceed_with_confidence(self, confidence: float) -> bool:
+        """신뢰도가 충분한지 판단"""
+        return confidence >= 0.7  # 70% 이상 신뢰도 필요
+```
+
+## 📊 모니터링 및 메트릭
+
+### DataGenie LLM 성능 메트릭
+```python
+# ✅ MANDATORY: DataGenie LLM 성능 추적
+class DataGenieLLMMetrics:
+    """DataGenie LLM 성능 메트릭"""
+    
+    def __init__(self):
+        self.success_rates = Counter()
+        self.response_times = []
+        self.token_usage = Counter()
+        self.confidence_scores = []
+        self.error_types = Counter()
+    
+    def record_sql_generation(
+        self,
+        success: bool,
+        response_time: float,
+        tokens_used: int,
+        confidence: float,
+        error_type: Optional[str] = None
+    ):
+        """SQL 생성 메트릭 기록"""
+        self.success_rates['sql_generation'] += 1 if success else 0
+        self.response_times.append(response_time)
+        self.token_usage['total'] += tokens_used
+        self.confidence_scores.append(confidence)
+        
+        if error_type:
+            self.error_types[error_type] += 1
+    
+    def get_performance_summary(self) -> Dict[str, Any]:
+        """성능 요약 생성"""
+        total_requests = len(self.response_times)
+        if total_requests == 0:
+            return {}
+        
+        return {
+            "success_rate": self.success_rates['sql_generation'] / total_requests,
+            "avg_response_time": sum(self.response_times) / total_requests,
+            "total_tokens_used": self.token_usage['total'],
+            "avg_confidence": sum(self.confidence_scores) / len(self.confidence_scores),
+            "top_errors": dict(self.error_types.most_common(5)),
+            "total_requests": total_requests
+        }
+```
+
+## 🎯 성공 기준
+
+### DataGenie LLM 품질 목표
+- **SQL 생성 성공률**: >90%
+- **평균 응답 시간**: <5초
+- **평균 신뢰도 점수**: >0.8
+- **토큰 효율성**: <1000 토큰/쿼리
+- **캐시 적중률**: >60%
+
+### 필수 체크리스트
+- [ ] ✅ 프롬프트 인젝션 탐지 활성화
+- [ ] ✅ 출력 검증 구현
+- [ ] ✅ 안전 키워드 차단
+- [ ] ✅ 캐싱 전략 배포
+- [ ] ✅ 토큰 사용량 최적화
+- [ ] ✅ 신뢰도 평가 활성화
+- [ ] ✅ 포괄적 에러 처리
+- [ ] ✅ 메트릭 수집 활성화
+
+Remember: **LLM 출력은 절대 맹목적으로 신뢰하지 않습니다.** 생성된 모든 SQL 쿼리와 Python 코드는 여러 검증 계층을 통과해야 합니다. LLM은 강력한 도구이지만, 보안과 정확성은 모델 자체의 안전성이 아닌 엄격한 검증에 달려 있습니다.
