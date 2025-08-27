@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+  <!-- 16:9 Aspect Ratio Background -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="userGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#2196F3;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#21CBF3;stop-opacity:0.8" />
+    </linearGradient>
+    
+    <linearGradient id="processGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#9C27B0;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#E91E63;stop-opacity:0.8" />
+    </linearGradient>
+    
+    <linearGradient id="llmGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FF9800;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#FFC107;stop-opacity:0.8" />
+    </linearGradient>
+    
+    <linearGradient id="dataGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#4CAF50;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#8BC34A;stop-opacity:0.8" />
+    </linearGradient>
+    
+    <linearGradient id="errorGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#F44336;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#E91E63;stop-opacity:0.8" />
+    </linearGradient>
+    
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <filter id="shadow">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.3"/>
+    </filter>
+    
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#4CAF50"/>
+    </marker>
+    
+    <marker id="errorArrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#F44336"/>
+    </marker>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1920" height="1080" fill="url(#bgGradient)"/>
+  
+  <!-- Title -->
+  <text x="960" y="60" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="42" font-weight="bold" filter="url(#glow)">
+    DataGenie 데이터 플로우 및 LLM 통합
+  </text>
+  
+  <!-- User Input -->
+  <g transform="translate(80, 120)">
+    <rect width="200" height="100" rx="15" fill="url(#userGradient)" filter="url(#shadow)"/>
+    <text x="100" y="35" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="24">👤</text>
+    <text x="100" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="bold">사용자 질문</text>
+    <text x="100" y="75" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">자연어 입력</text>
+    <text x="100" y="90" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">파일 업로드</text>
+  </g>
+  
+  <!-- Gradio UI -->
+  <g transform="translate(350, 120)">
+    <rect width="200" height="100" rx="15" fill="url(#userGradient)" filter="url(#shadow)"/>
+    <text x="100" y="35" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="24">🎨</text>
+    <text x="100" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="bold">Gradio UI</text>
+    <text x="100" y="75" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">웹 인터페이스</text>
+    <text x="100" y="90" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">실시간 결과</text>
+  </g>
+  
+  <!-- FastAPI Backend -->
+  <g transform="translate(620, 120)">
+    <rect width="200" height="100" rx="15" fill="url(#processGradient)" filter="url(#shadow)"/>
+    <text x="100" y="35" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="24">🚀</text>
+    <text x="100" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="bold">FastAPI</text>
+    <text x="100" y="75" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">백엔드 처리</text>
+    <text x="100" y="90" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">비동기 처리</text>
+  </g>
+  
+  <!-- Authentication -->
+  <g transform="translate(890, 120)">
+    <rect width="180" height="100" rx="15" fill="url(#processGradient)" filter="url(#shadow)"/>
+    <text x="90" y="35" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="24">🔐</text>
+    <text x="90" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="bold">인증 확인</text>
+    <text x="90" y="75" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">JWT 검증</text>
+    <text x="90" y="90" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">권한 확인</text>
+  </g>
+  
+  <!-- NLP Processing -->
+  <g transform="translate(1140, 120)">
+    <rect width="200" height="100" rx="15" fill="url(#llmGradient)" filter="url(#shadow)"/>
+    <text x="100" y="35" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="24">🧠</text>
+    <text x="100" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="bold">자연어 처리</text>
+    <text x="100" y="75" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">의도 분석</text>
+    <text x="100" y="90" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">질문 분류</text>
+  </g>
+  
+  <!-- Question Classification -->
+  <g transform="translate(1410, 120)">
+    <rect width="180" height="100" rx="15" fill="url(#llmGradient)" filter="url(#shadow)"/>
+    <text x="90" y="35" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="24">📝</text>
+    <text x="90" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="bold">질문 분류</text>
+    <text x="90" y="75" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">DB/Excel</text>
+    <text x="90" y="90" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">일반 질문</text>
+  </g>
+  
+  <!-- Database Flow -->
+  <g transform="translate(200, 300)">
+    <rect width="500" height="300" rx="20" fill="rgba(76, 175, 80, 0.2)" stroke="rgba(76, 175, 80, 0.5)" stroke-width="2" filter="url(#shadow)"/>
+    <text x="250" y="30" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="20" font-weight="bold">🗄️ 데이터베이스 플로우</text>
+    
+    <!-- Cache Check -->
+    <g transform="translate(50, 60)">
+      <rect width="150" height="70" rx="10" fill="url(#dataGradient)"/>
+      <text x="75" y="30" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">⚡ 캐시 확인</text>
+      <text x="75" y="50" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">Redis 조회</text>
+    </g>
+    
+    <!-- SQL Generation -->
+    <g transform="translate(250, 60)">
+      <rect width="150" height="70" rx="10" fill="url(#llmGradient)"/>
+      <text x="75" y="25" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">🔍 SQL 생성</text>
+      <text x="75" y="42" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">GPT-4 Agent</text>
+      <text x="75" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">LangChain</text>
+    </g>
+    
+    <!-- SQL Validation -->
+    <g transform="translate(50, 160)">
+      <rect width="150" height="70" rx="10" fill="url(#errorGradient)"/>
+      <text x="75" y="25" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">🛡️ SQL 검증</text>
+      <text x="75" y="42" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">보안 검사</text>
+      <text x="75" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">인젝션 방지</text>
+    </g>
+    
+    <!-- SQL Execution -->
+    <g transform="translate(250, 160)">
+      <rect width="150" height="70" rx="10" fill="url(#dataGradient)"/>
+      <text x="75" y="25" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">⚙️ SQL 실행</text>
+      <text x="75" y="42" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">외부 DB</text>
+      <text x="75" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">결과 반환</text>
+    </g>
+  </g>
+  
+  <!-- Excel Flow -->
+  <g transform="translate(800, 300)">
+    <rect width="500" height="300" rx="20" fill="rgba(233, 30, 99, 0.2)" stroke="rgba(233, 30, 99, 0.5)" stroke-width="2" filter="url(#shadow)"/>
+    <text x="250" y="30" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="20" font-weight="bold">📊 Excel 분석 플로우</text>
+    
+    <!-- File Upload -->
+    <g transform="translate(50, 60)">
+      <rect width="150" height="70" rx="10" fill="url(#userGradient)"/>
+      <text x="75" y="25" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">📁 파일 업로드</text>
+      <text x="75" y="42" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">Excel/CSV</text>
+      <text x="75" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">검증 처리</text>
+    </g>
+    
+    <!-- Pandas Processing -->
+    <g transform="translate(250, 60)">
+      <rect width="150" height="70" rx="10" fill="url(#dataGradient)"/>
+      <text x="75" y="25" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">🐼 Pandas</text>
+      <text x="75" y="42" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">데이터 처리</text>
+      <text x="75" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">분석 준비</text>
+    </g>
+    
+    <!-- Code Generation -->
+    <g transform="translate(50, 160)">
+      <rect width="150" height="70" rx="10" fill="url(#llmGradient)"/>
+      <text x="75" y="25" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">💻 코드 생성</text>
+      <text x="75" y="42" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">Python 코드</text>
+      <text x="75" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">GPT-4</text>
+    </g>
+    
+    <!-- Code Execution -->
+    <g transform="translate(250, 160)">
+      <rect width="150" height="70" rx="10" fill="url(#processGradient)"/>
+      <text x="75" y="25" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">⚙️ 코드 실행</text>
+      <text x="75" y="42" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">안전 실행</text>
+      <text x="75" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">결과 생성</text>
+    </g>
+  </g>
+  
+  <!-- Visualization Engine -->
+  <g transform="translate(1400, 300)">
+    <rect width="400" height="300" rx="20" fill="rgba(255, 152, 0, 0.2)" stroke="rgba(255, 152, 0, 0.5)" stroke-width="2" filter="url(#shadow)"/>
+    <text x="200" y="30" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="20" font-weight="bold">📈 시각화 엔진</text>
+    
+    <!-- Plotly Charts -->
+    <g transform="translate(50, 60)">
+      <rect width="120" height="60" rx="8" fill="url(#llmGradient)"/>
+      <text x="60" y="25" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">📊 막대차트</text>
+      <text x="60" y="40" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">Bar Chart</text>
+    </g>
+    
+    <g transform="translate(200, 60)">
+      <rect width="120" height="60" rx="8" fill="url(#llmGradient)"/>
+      <text x="60" y="25" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">📈 선형차트</text>
+      <text x="60" y="40" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">Line Chart</text>
+    </g>
+    
+    <g transform="translate(50, 140)">
+      <rect width="120" height="60" rx="8" fill="url(#llmGradient)"/>
+      <text x="60" y="25" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">🥧 원형차트</text>
+      <text x="60" y="40" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">Pie Chart</text>
+    </g>
+    
+    <g transform="translate(200, 140)">
+      <rect width="120" height="60" rx="8" fill="url(#llmGradient)"/>
+      <text x="60" y="25" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">🔵 산점도</text>
+      <text x="60" y="40" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">Scatter Plot</text>
+    </g>
+    
+    <!-- Auto Selection -->
+    <g transform="translate(125, 220)">
+      <rect width="150" height="50" rx="8" fill="url(#processGradient)"/>
+      <text x="75" y="25" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">🤖 자동 선택</text>
+      <text x="75" y="40" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">데이터 기반</text>
+    </g>
+  </g>
+  
+  <!-- Final Output -->
+  <g transform="translate(700, 700)">
+    <rect width="300" height="120" rx="15" fill="url(#userGradient)" filter="url(#shadow)"/>
+    <text x="150" y="40" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="24">🎯</text>
+    <text x="150" y="65" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="18" font-weight="bold">최종 응답</text>
+    <text x="150" y="85" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14">분석 결과 + 시각화</text>
+    <text x="150" y="105" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14">인사이트 제공</text>
+  </g>
+  
+  <!-- Error Handling -->
+  <g transform="translate(100, 700)">
+    <rect width="200" height="100" rx="15" fill="url(#errorGradient)" filter="url(#shadow)"/>
+    <text x="100" y="35" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="24">❌</text>
+    <text x="100" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="bold">에러 처리</text>
+    <text x="100" y="75" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">보안 오류</text>
+    <text x="100" y="90" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">검증 실패</text>
+  </g>
+  
+  <!-- Data Storage -->
+  <g transform="translate(1200, 700)">
+    <rect width="400" height="120" rx="15" fill="rgba(0,0,0,0.4)" filter="url(#shadow)"/>
+    <text x="200" y="30" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="18" font-weight="bold">💾 데이터 저장소</text>
+    
+    <g transform="translate(50, 50)">
+      <rect width="130" height="50" rx="8" fill="url(#errorGradient)"/>
+      <text x="65" y="25" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">⚡ Redis Cache</text>
+      <text x="65" y="40" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">쿼리 결과</text>
+    </g>
+    
+    <g transform="translate(220, 50)">
+      <rect width="130" height="50" rx="8" fill="url(#dataGradient)"/>
+      <text x="65" y="25" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">🗄️ PostgreSQL</text>
+      <text x="65" y="40" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">시스템 DB</text>
+    </g>
+  </g>
+  
+  <!-- Flow Arrows -->
+  <!-- Main Flow -->
+  <path d="M 280 170 L 350 170" stroke="#4CAF50" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 550 170 L 620 170" stroke="#4CAF50" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 820 170 L 890 170" stroke="#4CAF50" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 1070 170 L 1140 170" stroke="#4CAF50" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 1340 170 L 1410 170" stroke="#4CAF50" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- Branch to DB Flow -->
+  <path d="M 1500 220 Q 1500 250 450 280" stroke="#4CAF50" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- Branch to Excel Flow -->
+  <path d="M 1500 220 Q 1500 250 1050 280" stroke="#E91E63" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- To Visualization -->
+  <path d="M 700 450 Q 1100 500 1400 450" stroke="#FF9800" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 1300 450 Q 1400 500 1400 450" stroke="#FF9800" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- To Final Output -->
+  <path d="M 1600 600 Q 1200 650 850 700" stroke="#4CAF50" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- Error Flows -->
+  <path d="M 980 220 Q 500 400 200 700" stroke="#F44336" stroke-width="2" fill="none" marker-end="url(#errorArrow)" stroke-dasharray="5,5"/>
+  <path d="M 450 600 Q 300 650 200 700" stroke="#F44336" stroke-width="2" fill="none" marker-end="url(#errorArrow)" stroke-dasharray="5,5"/>
+  
+  <!-- Cache Connections -->
+  <path d="M 450 600 Q 800 650 1200 750" stroke="#9C27B0" stroke-width="2" fill="none" stroke-dasharray="3,3"/>
+  <path d="M 720 220 Q 1000 400 1200 750" stroke="#9C27B0" stroke-width="2" fill="none" stroke-dasharray="3,3"/>
+  
+  <!-- Performance Metrics -->
+  <g transform="translate(50, 900)">
+    <rect width="1800" height="120" rx="15" fill="rgba(0,0,0,0.4)" filter="url(#shadow)"/>
+    <text x="900" y="30" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="20" font-weight="bold">⚡ 성능 메트릭</text>
+    
+    <g transform="translate(200, 50)">
+      <text x="0" y="20" fill="#4CAF50" font-family="Arial, sans-serif" font-size="24" font-weight="bold">< 10초</text>
+      <text x="0" y="40" fill="white" font-family="Arial, sans-serif" font-size="14">평균 응답 시간</text>
+    </g>
+    
+    <g transform="translate(500, 50)">
+      <text x="0" y="20" fill="#2196F3" font-family="Arial, sans-serif" font-size="24" font-weight="bold">100명</text>
+      <text x="0" y="40" fill="white" font-family="Arial, sans-serif" font-size="14">동시 사용자</text>
+    </g>
+    
+    <g transform="translate(800, 50)">
+      <text x="0" y="20" fill="#FF9800" font-family="Arial, sans-serif" font-size="24" font-weight="bold">95%</text>
+      <text x="0" y="40" fill="white" font-family="Arial, sans-serif" font-size="14">캐시 히트율</text>
+    </g>
+    
+    <g transform="translate(1100, 50)">
+      <text x="0" y="20" fill="#9C27B0" font-family="Arial, sans-serif" font-size="24" font-weight="bold">< 1%</text>
+      <text x="0" y="40" fill="white" font-family="Arial, sans-serif" font-size="14">에러율</text>
+    </g>
+    
+    <g transform="translate(1400, 50)">
+      <text x="0" y="20" fill="#F44336" font-family="Arial, sans-serif" font-size="24" font-weight="bold">30초</text>
+      <text x="0" y="40" fill="white" font-family="Arial, sans-serif" font-size="14">최대 타임아웃</text>
+    </g>
+  </g>
+</svg>

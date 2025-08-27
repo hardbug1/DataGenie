@@ -1,0 +1,617 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+  <!-- 16:9 Aspect Ratio Background -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="frontendGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#2196F3;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#21CBF3;stop-opacity:0.8" />
+    </linearGradient>
+    
+    <linearGradient id="backendGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#9C27B0;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#E91E63;stop-opacity:0.8" />
+    </linearGradient>
+    
+    <linearGradient id="aiGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FF9800;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#FFC107;stop-opacity:0.8" />
+    </linearGradient>
+    
+    <linearGradient id="databaseGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#4CAF50;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#8BC34A;stop-opacity:0.8" />
+    </linearGradient>
+    
+    <linearGradient id="dataGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#E91E63;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#F06292;stop-opacity:0.8" />
+    </linearGradient>
+    
+    <linearGradient id="vizGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00BCD4;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#26C6DA;stop-opacity:0.8" />
+    </linearGradient>
+    
+    <linearGradient id="cacheGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FFC107;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#FFD54F;stop-opacity:0.8" />
+    </linearGradient>
+    
+    <linearGradient id="securityGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#F44336;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#EF5350;stop-opacity:0.8" />
+    </linearGradient>
+    
+    <linearGradient id="httpGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#8BC34A;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#AED581;stop-opacity:0.8" />
+    </linearGradient>
+    
+    <linearGradient id="devGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#9E9E9E;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#BDBDBD;stop-opacity:0.8" />
+    </linearGradient>
+    
+    <linearGradient id="infraGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#3F51B5;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#5C6BC0;stop-opacity:0.8" />
+    </linearGradient>
+    
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <filter id="shadow">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.3"/>
+    </filter>
+    
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#4CAF50"/>
+    </marker>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1920" height="1080" fill="url(#bgGradient)"/>
+  
+  <!-- Title -->
+  <text x="960" y="60" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="42" font-weight="bold" filter="url(#glow)">
+    DataGenie 기술 스택 및 의존성
+  </text>
+  
+  <!-- Frontend Layer -->
+  <g transform="translate(80, 100)">
+    <rect width="400" height="200" rx="20" fill="url(#frontendGradient)" filter="url(#shadow)"/>
+    <text x="200" y="30" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="20" font-weight="bold">🎨 Frontend Layer</text>
+    
+    <!-- Gradio -->
+    <g transform="translate(50, 50)">
+      <rect width="140" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="70" y="25" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">🎨 Gradio 4.8.0</text>
+      <text x="70" y="40" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">Interactive UI</text>
+      <text x="70" y="52" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">Real-time Updates</text>
+    </g>
+    
+    <!-- Custom CSS -->
+    <g transform="translate(210, 50)">
+      <rect width="140" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="70" y="25" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">🎨 Custom CSS</text>
+      <text x="70" y="40" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">Responsive Design</text>
+      <text x="70" y="52" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">Modern UI/UX</text>
+    </g>
+    
+    <!-- WebSocket -->
+    <g transform="translate(130, 120)">
+      <rect width="140" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="70" y="25" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">🔗 WebSocket</text>
+      <text x="70" y="40" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">Real-time Comm</text>
+      <text x="70" y="52" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">Live Updates</text>
+    </g>
+  </g>
+  
+  <!-- Backend Framework -->
+  <g transform="translate(520, 100)">
+    <rect width="400" height="200" rx="20" fill="url(#backendGradient)" filter="url(#shadow)"/>
+    <text x="200" y="30" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="20" font-weight="bold">🚀 Backend Framework</text>
+    
+    <!-- FastAPI -->
+    <g transform="translate(30, 50)">
+      <rect width="110" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="55" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">🚀 FastAPI</text>
+      <text x="55" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">0.104.1</text>
+      <text x="55" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Async Framework</text>
+      <text x="55" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Auto API Docs</text>
+    </g>
+    
+    <!-- Uvicorn -->
+    <g transform="translate(150, 50)">
+      <rect width="110" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="55" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">⚡ Uvicorn</text>
+      <text x="55" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">0.24.0</text>
+      <text x="55" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">ASGI Server</text>
+      <text x="55" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">High Performance</text>
+    </g>
+    
+    <!-- Pydantic -->
+    <g transform="translate(270, 50)">
+      <rect width="110" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="55" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">✅ Pydantic</text>
+      <text x="55" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">2.5.0</text>
+      <text x="55" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Data Validation</text>
+      <text x="55" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Type Safety</text>
+    </g>
+    
+    <!-- SQLAlchemy -->
+    <g transform="translate(90, 120)">
+      <rect width="110" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="55" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11" font-weight="bold">🗄️ SQLAlchemy</text>
+      <text x="55" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">2.0.23</text>
+      <text x="55" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">ORM & Core</text>
+      <text x="55" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Connection Pool</text>
+    </g>
+    
+    <!-- Alembic -->
+    <g transform="translate(210, 120)">
+      <rect width="110" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="55" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">🔄 Alembic</text>
+      <text x="55" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">1.12.1</text>
+      <text x="55" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">DB Migration</text>
+      <text x="55" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Version Control</text>
+    </g>
+  </g>
+  
+  <!-- AI & LLM Stack -->
+  <g transform="translate(960, 100)">
+    <rect width="400" height="200" rx="20" fill="url(#aiGradient)" filter="url(#shadow)"/>
+    <text x="200" y="30" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="20" font-weight="bold">🤖 AI & LLM Stack</text>
+    
+    <!-- OpenAI -->
+    <g transform="translate(30, 50)">
+      <rect width="110" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="55" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">🧠 OpenAI</text>
+      <text x="55" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">≥1.6.1</text>
+      <text x="55" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">GPT-4 Integration</text>
+      <text x="55" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Function Calling</text>
+    </g>
+    
+    <!-- LangChain -->
+    <g transform="translate(150, 50)">
+      <rect width="110" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="55" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">🔗 LangChain</text>
+      <text x="55" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">0.0.340</text>
+      <text x="55" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">SQL Agents</text>
+      <text x="55" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Chain Management</text>
+    </g>
+    
+    <!-- TikToken -->
+    <g transform="translate(270, 50)">
+      <rect width="110" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="55" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">🔤 TikToken</text>
+      <text x="55" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">≥0.5.2</text>
+      <text x="55" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Token Counting</text>
+      <text x="55" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Cost Optimization</text>
+    </g>
+    
+    <!-- Prompt Templates -->
+    <g transform="translate(90, 120)">
+      <rect width="110" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="55" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11" font-weight="bold">📝 Prompts</text>
+      <text x="55" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">Templates</text>
+      <text x="55" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">SQL Generation</text>
+      <text x="55" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Code Generation</text>
+    </g>
+    
+    <!-- Security -->
+    <g transform="translate(210, 120)">
+      <rect width="110" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="55" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11" font-weight="bold">🛡️ Security</text>
+      <text x="55" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">Validation</text>
+      <text x="55" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Prompt Injection</text>
+      <text x="55" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Output Validation</text>
+    </g>
+  </g>
+  
+  <!-- Database Layer -->
+  <g transform="translate(1400, 100)">
+    <rect width="400" height="200" rx="20" fill="url(#databaseGradient)" filter="url(#shadow)"/>
+    <text x="200" y="30" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="20" font-weight="bold">🗄️ Database Layer</text>
+    
+    <!-- AsyncPG -->
+    <g transform="translate(30, 50)">
+      <rect width="110" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="55" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">🐘 AsyncPG</text>
+      <text x="55" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">0.29.0</text>
+      <text x="55" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">PostgreSQL</text>
+      <text x="55" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Async Driver</text>
+    </g>
+    
+    <!-- AioMySQL -->
+    <g transform="translate(150, 50)">
+      <rect width="110" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="55" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">🐬 AioMySQL</text>
+      <text x="55" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">0.2.0</text>
+      <text x="55" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">MySQL</text>
+      <text x="55" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Async Driver</text>
+    </g>
+    
+    <!-- AioSQLite -->
+    <g transform="translate(270, 50)">
+      <rect width="110" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="55" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11" font-weight="bold">💾 AioSQLite</text>
+      <text x="55" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">0.19.0</text>
+      <text x="55" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">SQLite</text>
+      <text x="55" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Async Driver</text>
+    </g>
+    
+    <!-- Connection Pool -->
+    <g transform="translate(90, 120)">
+      <rect width="110" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="55" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11" font-weight="bold">🔗 Pool</text>
+      <text x="55" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">Management</text>
+      <text x="55" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Connection Pool</text>
+      <text x="55" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Auto Reconnect</text>
+    </g>
+    
+    <!-- Read-Only -->
+    <g transform="translate(210, 120)">
+      <rect width="110" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="55" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11" font-weight="bold">🔒 Read-Only</text>
+      <text x="55" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">Access</text>
+      <text x="55" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Security</text>
+      <text x="55" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Data Protection</text>
+    </g>
+  </g>
+  
+  <!-- Data Processing -->
+  <g transform="translate(80, 340)">
+    <rect width="400" height="200" rx="20" fill="url(#dataGradient)" filter="url(#shadow)"/>
+    <text x="200" y="30" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="20" font-weight="bold">📊 Data Processing</text>
+    
+    <!-- Pandas -->
+    <g transform="translate(50, 50)">
+      <rect width="140" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="70" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">🐼 Pandas</text>
+      <text x="70" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">2.1.4</text>
+      <text x="70" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">Data Manipulation</text>
+      <text x="70" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">Excel Processing</text>
+    </g>
+    
+    <!-- NumPy -->
+    <g transform="translate(210, 50)">
+      <rect width="140" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="70" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">🔢 NumPy</text>
+      <text x="70" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">1.25.2</text>
+      <text x="70" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">Numerical Computing</text>
+      <text x="70" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">Array Operations</text>
+    </g>
+    
+    <!-- OpenPyXL -->
+    <g transform="translate(130, 120)">
+      <rect width="140" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="70" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">📊 OpenPyXL</text>
+      <text x="70" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">3.1.2</text>
+      <text x="70" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">Excel File Support</text>
+      <text x="70" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">Read/Write Operations</text>
+    </g>
+  </g>
+  
+  <!-- Visualization -->
+  <g transform="translate(520, 340)">
+    <rect width="400" height="200" rx="20" fill="url(#vizGradient)" filter="url(#shadow)"/>
+    <text x="200" y="30" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="20" font-weight="bold">📈 Visualization</text>
+    
+    <!-- Plotly -->
+    <g transform="translate(130, 60)">
+      <rect width="140" height="80" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="70" y="25" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="bold">📊 Plotly</text>
+      <text x="70" y="40" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="bold">5.17.0</text>
+      <text x="70" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">Interactive Charts</text>
+      <text x="70" y="68" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">Web-based Plots</text>
+    </g>
+    
+    <!-- Chart Types -->
+    <g transform="translate(50, 150)">
+      <text x="0" y="15" fill="white" font-family="Arial, sans-serif" font-size="12">📊 Bar • 📈 Line • 🥧 Pie • 🔵 Scatter • 📋 Table</text>
+    </g>
+  </g>
+  
+  <!-- Caching Layer -->
+  <g transform="translate(960, 340)">
+    <rect width="400" height="200" rx="20" fill="url(#cacheGradient)" filter="url(#shadow)"/>
+    <text x="200" y="30" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="20" font-weight="bold">⚡ Caching Layer</text>
+    
+    <!-- Redis -->
+    <g transform="translate(50, 50)">
+      <rect width="140" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="70" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">⚡ Redis</text>
+      <text x="70" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">5.0.1</text>
+      <text x="70" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">In-Memory Cache</text>
+      <text x="70" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">Session Storage</text>
+    </g>
+    
+    <!-- AioRedis -->
+    <g transform="translate(210, 50)">
+      <rect width="140" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="70" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">🔄 AioRedis</text>
+      <text x="70" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">2.0.1</text>
+      <text x="70" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">Async Client</text>
+      <text x="70" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">Connection Pool</text>
+    </g>
+    
+    <!-- Cache Strategy -->
+    <g transform="translate(130, 120)">
+      <rect width="140" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="70" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">📋 Strategy</text>
+      <text x="70" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">Multi-Layer</text>
+      <text x="70" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">Query Results</text>
+      <text x="70" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">LLM Responses</text>
+    </g>
+  </g>
+  
+  <!-- Security Stack -->
+  <g transform="translate(1400, 340)">
+    <rect width="400" height="200" rx="20" fill="url(#securityGradient)" filter="url(#shadow)"/>
+    <text x="200" y="30" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="20" font-weight="bold">🔐 Security Stack</text>
+    
+    <!-- JWT -->
+    <g transform="translate(30, 50)">
+      <rect width="110" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="55" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">🔑 PyJWT</text>
+      <text x="55" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">2.8.0</text>
+      <text x="55" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Token Auth</text>
+      <text x="55" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Secure Sessions</text>
+    </g>
+    
+    <!-- JOSE -->
+    <g transform="translate(150, 50)">
+      <rect width="110" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="55" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11" font-weight="bold">🔐 Python-JOSE</text>
+      <text x="55" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">3.3.0</text>
+      <text x="55" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">JWT with Crypto</text>
+      <text x="55" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Key Management</text>
+    </g>
+    
+    <!-- Passlib -->
+    <g transform="translate(270, 50)">
+      <rect width="110" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="55" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">🔒 Passlib</text>
+      <text x="55" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">1.7.4</text>
+      <text x="55" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Password Hash</text>
+      <text x="55" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Bcrypt Support</text>
+    </g>
+    
+    <!-- Cryptography -->
+    <g transform="translate(90, 120)">
+      <rect width="110" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="55" y="18" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10" font-weight="bold">🛡️ Cryptography</text>
+      <text x="55" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">41.0.7</text>
+      <text x="55" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Encryption</text>
+      <text x="55" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Certificate</text>
+    </g>
+    
+    <!-- Email Validator -->
+    <g transform="translate(210, 120)">
+      <rect width="110" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="55" y="18" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10" font-weight="bold">📧 Email Valid</text>
+      <text x="55" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">2.1.0</text>
+      <text x="55" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Email Validation</text>
+      <text x="55" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Format Check</text>
+    </g>
+  </g>
+  
+  <!-- HTTP & Files -->
+  <g transform="translate(80, 580)">
+    <rect width="400" height="200" rx="20" fill="url(#httpGradient)" filter="url(#shadow)"/>
+    <text x="200" y="30" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="20" font-weight="bold">🌐 HTTP & Files</text>
+    
+    <!-- HTTPX -->
+    <g transform="translate(50, 50)">
+      <rect width="140" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="70" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">🌐 HTTPX</text>
+      <text x="70" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">0.25.2</text>
+      <text x="70" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">Async HTTP Client</text>
+      <text x="70" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">HTTP/2 Support</text>
+    </g>
+    
+    <!-- AioFiles -->
+    <g transform="translate(210, 50)">
+      <rect width="140" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="70" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">📁 AioFiles</text>
+      <text x="70" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">23.2.1</text>
+      <text x="70" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">Async File I/O</text>
+      <text x="70" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">Large File Handle</text>
+    </g>
+    
+    <!-- Multipart -->
+    <g transform="translate(130, 120)">
+      <rect width="140" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="70" y="18" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">📤 Python-Multipart</text>
+      <text x="70" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">0.0.6</text>
+      <text x="70" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">File Upload</text>
+      <text x="70" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">Form Data Parsing</text>
+    </g>
+  </g>
+  
+  <!-- Development Tools -->
+  <g transform="translate(520, 580)">
+    <rect width="400" height="200" rx="20" fill="url(#devGradient)" filter="url(#shadow)"/>
+    <text x="200" y="30" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="20" font-weight="bold">🔧 Development Tools</text>
+    
+    <!-- Python-dotenv -->
+    <g transform="translate(30, 50)">
+      <rect width="110" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="55" y="18" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10" font-weight="bold">⚙️ Python-dotenv</text>
+      <text x="55" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">1.0.0</text>
+      <text x="55" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Environment Vars</text>
+      <text x="55" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Config Management</text>
+    </g>
+    
+    <!-- Structlog -->
+    <g transform="translate(150, 50)">
+      <rect width="110" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="55" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">📝 Structlog</text>
+      <text x="55" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">23.2.0</text>
+      <text x="55" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Structured Log</text>
+      <text x="55" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">JSON Output</text>
+    </g>
+    
+    <!-- Rich -->
+    <g transform="translate(270, 50)">
+      <rect width="110" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="55" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">🎨 Rich</text>
+      <text x="55" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">13.7.0</text>
+      <text x="55" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Terminal Format</text>
+      <text x="55" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Progress Bars</text>
+    </g>
+    
+    <!-- Testing -->
+    <g transform="translate(90, 120)">
+      <rect width="110" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="55" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">🧪 Pytest</text>
+      <text x="55" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">Testing</text>
+      <text x="55" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Unit Tests</text>
+      <text x="55" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Coverage</text>
+    </g>
+    
+    <!-- Linting -->
+    <g transform="translate(210, 120)">
+      <rect width="110" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="55" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">🔍 Linting</text>
+      <text x="55" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">Quality</text>
+      <text x="55" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">Black • Flake8</text>
+      <text x="55" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">MyPy</text>
+    </g>
+  </g>
+  
+  <!-- Infrastructure -->
+  <g transform="translate(960, 580)">
+    <rect width="400" height="200" rx="20" fill="url(#infraGradient)" filter="url(#shadow)"/>
+    <text x="200" y="30" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="20" font-weight="bold">🐳 Infrastructure</text>
+    
+    <!-- Docker -->
+    <g transform="translate(90, 60)">
+      <rect width="220" height="80" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="110" y="25" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="bold">🐳 Docker & Compose</text>
+      <text x="110" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">Containerization</text>
+      <text x="110" y="60" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">Multi-container Apps</text>
+      <text x="110" y="75" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">Environment Isolation</text>
+    </g>
+    
+    <!-- Services -->
+    <g transform="translate(50, 150)">
+      <text x="0" y="15" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">Services:</text>
+      <text x="80" y="15" fill="white" font-family="Arial, sans-serif" font-size="12">App • PostgreSQL • Redis • Nginx</text>
+    </g>
+  </g>
+  
+  <!-- Performance Monitoring -->
+  <g transform="translate(1400, 580)">
+    <rect width="400" height="200" rx="20" fill="rgba(0,0,0,0.4)" filter="url(#shadow)"/>
+    <text x="200" y="30" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="20" font-weight="bold">📊 Monitoring</text>
+    
+    <!-- Prometheus -->
+    <g transform="translate(50, 50)">
+      <rect width="140" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="70" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">📈 Prometheus</text>
+      <text x="70" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">Metrics</text>
+      <text x="70" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">Performance</text>
+      <text x="70" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">Health Checks</text>
+    </g>
+    
+    <!-- Grafana -->
+    <g transform="translate(210, 50)">
+      <rect width="140" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="70" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">📊 Grafana</text>
+      <text x="70" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">Dashboard</text>
+      <text x="70" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">Visualization</text>
+      <text x="70" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">Alerting</text>
+    </g>
+    
+    <!-- Metrics -->
+    <g transform="translate(130, 120)">
+      <rect width="140" height="60" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="70" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">📋 Metrics</text>
+      <text x="70" y="32" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">Collection</text>
+      <text x="70" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">Response Time</text>
+      <text x="70" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">Error Rate</text>
+    </g>
+  </g>
+  
+  <!-- Dependency Arrows -->
+  <!-- Frontend to Backend -->
+  <path d="M 480 200 L 520 200" stroke="#4CAF50" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- Backend to AI -->
+  <path d="M 920 200 L 960 200" stroke="#4CAF50" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- Backend to Database -->
+  <path d="M 920 200 Q 1200 250 1400 200" stroke="#4CAF50" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- Backend to Data Processing -->
+  <path d="M 720 300 Q 400 350 280 340" stroke="#4CAF50" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- Data to Visualization -->
+  <path d="M 480 440 L 520 440" stroke="#4CAF50" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- Backend to Cache -->
+  <path d="M 720 300 Q 900 350 960 340" stroke="#4CAF50" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- Backend to Security -->
+  <path d="M 920 200 Q 1200 250 1400 340" stroke="#F44336" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- Backend to HTTP -->
+  <path d="M 720 300 Q 400 500 280 580" stroke="#8BC34A" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- All to Infrastructure -->
+  <path d="M 960 780 Q 960 800 1160 680" stroke="#3F51B5" stroke-width="2" fill="none" stroke-dasharray="5,5"/>
+  <path d="M 1400 780 Q 1400 800 1160 680" stroke="#3F51B5" stroke-width="2" fill="none" stroke-dasharray="5,5"/>
+  
+  <!-- Performance Summary -->
+  <g transform="translate(50, 820)">
+    <rect width="1800" height="120" rx="15" fill="rgba(0,0,0,0.4)" filter="url(#shadow)"/>
+    <text x="900" y="30" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="20" font-weight="bold">⚡ 기술 스택 특징</text>
+    
+    <g transform="translate(100, 50)">
+      <text x="0" y="20" fill="#4CAF50" font-family="Arial, sans-serif" font-size="16" font-weight="bold">🚀 고성능</text>
+      <text x="0" y="40" fill="white" font-family="Arial, sans-serif" font-size="12">비동기 처리 • 연결 풀링</text>
+    </g>
+    
+    <g transform="translate(350, 50)">
+      <text x="0" y="20" fill="#2196F3" font-family="Arial, sans-serif" font-size="16" font-weight="bold">🛡️ 보안</text>
+      <text x="0" y="40" fill="white" font-family="Arial, sans-serif" font-size="12">JWT • 암호화 • 검증</text>
+    </g>
+    
+    <g transform="translate(600, 50)">
+      <text x="0" y="20" fill="#FF9800" font-family="Arial, sans-serif" font-size="16" font-weight="bold">🤖 AI 통합</text>
+      <text x="0" y="40" fill="white" font-family="Arial, sans-serif" font-size="12">GPT-4 • LangChain • 최적화</text>
+    </g>
+    
+    <g transform="translate(850, 50)">
+      <text x="0" y="20" fill="#9C27B0" font-family="Arial, sans-serif" font-size="16" font-weight="bold">📊 데이터</text>
+      <text x="0" y="40" fill="white" font-family="Arial, sans-serif" font-size="12">다중 DB • Excel • 시각화</text>
+    </g>
+    
+    <g transform="translate(1100, 50)">
+      <text x="0" y="20" fill="#F44336" font-family="Arial, sans-serif" font-size="16" font-weight="bold">⚡ 캐싱</text>
+      <text x="0" y="40" fill="white" font-family="Arial, sans-serif" font-size="12">Redis • 다층 • 최적화</text>
+    </g>
+    
+    <g transform="translate(1350, 50)">
+      <text x="0" y="20" fill="#00BCD4" font-family="Arial, sans-serif" font-size="16" font-weight="bold">🐳 배포</text>
+      <text x="0" y="40" fill="white" font-family="Arial, sans-serif" font-size="12">Docker • 컨테이너 • 확장</text>
+    </g>
+    
+    <g transform="translate(1600, 50)">
+      <text x="0" y="20" fill="#795548" font-family="Arial, sans-serif" font-size="16" font-weight="bold">📊 모니터링</text>
+      <text x="0" y="40" fill="white" font-family="Arial, sans-serif" font-size="12">메트릭 • 로깅 • 알림</text>
+    </g>
+  </g>
+</svg>

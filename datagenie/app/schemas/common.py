@@ -69,7 +69,7 @@ class ErrorResponse(BaseResponse):
     )
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "success": False,
                 "message": "Validation error",
@@ -106,7 +106,7 @@ class PaginatedResponse(BaseResponse, Generic[T]):
     )
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "success": True,
                 "message": "Data retrieved successfully",
@@ -154,7 +154,7 @@ class PaginationRequest(BaseModel):
     
     sort_order: Optional[str] = Field(
         default="asc",
-        regex="^(asc|desc)$",
+        pattern="^(asc|desc)$",
         description="Sort order (asc or desc)"
     )
     
@@ -197,7 +197,7 @@ class HealthResponse(BaseModel):
     )
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "status": "healthy",
                 "timestamp": "2023-12-01T10:00:00Z",
@@ -279,7 +279,7 @@ class BulkOperationResponse(BaseResponse):
     )
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "success": True,
                 "message": "Bulk operation completed",
@@ -312,7 +312,7 @@ class FileUploadResponse(BaseResponse):
     )
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "success": True,
                 "message": "File uploaded successfully",

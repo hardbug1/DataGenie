@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+  <!-- 16:9 Aspect Ratio Background -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="presentationGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#2196F3;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#21CBF3;stop-opacity:0.8" />
+    </linearGradient>
+    
+    <linearGradient id="usecaseGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#9C27B0;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#E91E63;stop-opacity:0.8" />
+    </linearGradient>
+    
+    <linearGradient id="domainGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#4CAF50;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#8BC34A;stop-opacity:0.8" />
+    </linearGradient>
+    
+    <linearGradient id="infraGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FF9800;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#FFC107;stop-opacity:0.8" />
+    </linearGradient>
+    
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <filter id="shadow">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1920" height="1080" fill="url(#bgGradient)"/>
+  
+  <!-- Title -->
+  <text x="960" y="80" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="48" font-weight="bold" filter="url(#glow)">
+    DataGenie Clean Architecture
+  </text>
+  
+  <!-- Presentation Layer -->
+  <g transform="translate(160, 150)">
+    <rect width="1600" height="180" rx="20" fill="url(#presentationGradient)" filter="url(#shadow)"/>
+    <text x="80" y="40" fill="white" font-family="Arial, sans-serif" font-size="32" font-weight="bold">🌐 Presentation Layer</text>
+    
+    <!-- Gradio UI -->
+    <g transform="translate(100, 70)">
+      <rect width="300" height="80" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="150" y="30" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="18" font-weight="bold">🎨 Gradio Web UI</text>
+      <text x="150" y="50" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14">Interactive Interface</text>
+      <text x="150" y="65" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14">Real-time Results</text>
+    </g>
+    
+    <!-- FastAPI -->
+    <g transform="translate(500, 70)">
+      <rect width="300" height="80" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="150" y="30" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="18" font-weight="bold">🚀 FastAPI REST API</text>
+      <text x="150" y="50" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14">Auto Documentation</text>
+      <text x="150" y="65" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14">Type Validation</text>
+    </g>
+    
+    <!-- Dependencies -->
+    <g transform="translate(900, 70)">
+      <rect width="280" height="80" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="140" y="30" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="18" font-weight="bold">🔗 Dependencies</text>
+      <text x="140" y="50" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14">Dependency Injection</text>
+      <text x="140" y="65" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14">Authentication</text>
+    </g>
+  </g>
+  
+  <!-- Use Cases Layer -->
+  <g transform="translate(160, 380)">
+    <rect width="1600" height="180" rx="20" fill="url(#usecaseGradient)" filter="url(#shadow)"/>
+    <text x="80" y="40" fill="white" font-family="Arial, sans-serif" font-size="32" font-weight="bold">💼 Use Cases Layer</text>
+    
+    <!-- Execute Analysis -->
+    <g transform="translate(100, 70)">
+      <rect width="300" height="80" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="150" y="25" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="18" font-weight="bold">📊 Execute Analysis</text>
+      <text x="150" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14">Question Processing</text>
+      <text x="150" y="60" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14">Result Generation</text>
+    </g>
+    
+    <!-- Authentication -->
+    <g transform="translate(500, 70)">
+      <rect width="300" height="80" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="150" y="25" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="18" font-weight="bold">🔐 Authentication</text>
+      <text x="150" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14">JWT Validation</text>
+      <text x="150" y="60" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14">User Management</text>
+    </g>
+    
+    <!-- Data Management -->
+    <g transform="translate(900, 70)">
+      <rect width="280" height="80" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="140" y="25" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="18" font-weight="bold">📁 Data Management</text>
+      <text x="140" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14">Connection Setup</text>
+      <text x="140" y="60" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14">File Processing</text>
+    </g>
+  </g>
+  
+  <!-- Domain Layer -->
+  <g transform="translate(160, 610)">
+    <rect width="1600" height="180" rx="20" fill="url(#domainGradient)" filter="url(#shadow)"/>
+    <text x="80" y="40" fill="white" font-family="Arial, sans-serif" font-size="32" font-weight="bold">🏛️ Domain Layer</text>
+    
+    <!-- Entities -->
+    <g transform="translate(100, 70)">
+      <rect width="300" height="80" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="150" y="25" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="18" font-weight="bold">📋 Entities</text>
+      <text x="150" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14">AnalysisQuery</text>
+      <text x="150" y="60" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14">User, Connection</text>
+    </g>
+    
+    <!-- Value Objects -->
+    <g transform="translate(500, 70)">
+      <rect width="300" height="80" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="150" y="25" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="18" font-weight="bold">💎 Value Objects</text>
+      <text x="150" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14">AnalysisResult</text>
+      <text x="150" y="60" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14">QueryStatus</text>
+    </g>
+    
+    <!-- Interfaces -->
+    <g transform="translate(900, 70)">
+      <rect width="280" height="80" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="140" y="25" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="18" font-weight="bold">🔌 Interfaces</text>
+      <text x="140" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14">IAnalysisEngine</text>
+      <text x="140" y="60" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14">IQueryRepository</text>
+    </g>
+  </g>
+  
+  <!-- Infrastructure Layer -->
+  <g transform="translate(160, 840)">
+    <rect width="1600" height="180" rx="20" fill="url(#infraGradient)" filter="url(#shadow)"/>
+    <text x="80" y="40" fill="white" font-family="Arial, sans-serif" font-size="32" font-weight="bold">🔧 Infrastructure Layer</text>
+    
+    <!-- LLM Processor -->
+    <g transform="translate(50, 70)">
+      <rect width="240" height="80" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="120" y="25" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="bold">🤖 LLM Processor</text>
+      <text x="120" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">OpenAI GPT-4</text>
+      <text x="120" y="60" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">LangChain</text>
+    </g>
+    
+    <!-- Database Adapters -->
+    <g transform="translate(340, 70)">
+      <rect width="240" height="80" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="120" y="25" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="bold">🗄️ DB Adapters</text>
+      <text x="120" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">PostgreSQL</text>
+      <text x="120" y="60" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">MySQL, SQLite</text>
+    </g>
+    
+    <!-- Redis Cache -->
+    <g transform="translate(630, 70)">
+      <rect width="240" height="80" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="120" y="25" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="bold">⚡ Redis Cache</text>
+      <text x="120" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">Query Results</text>
+      <text x="120" y="60" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">Session Data</text>
+    </g>
+    
+    <!-- Security -->
+    <g transform="translate(920, 70)">
+      <rect width="240" height="80" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="120" y="25" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="bold">🛡️ Security</text>
+      <text x="120" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">SQL Validator</text>
+      <text x="120" y="60" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">PII Masker</text>
+    </g>
+    
+    <!-- Core Engines -->
+    <g transform="translate(1210, 70)">
+      <rect width="240" height="80" rx="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <text x="120" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="bold">📊 Core Engines</text>
+      <text x="120" y="38" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">NLP • SQL • Excel</text>
+      <text x="120" y="53" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">Visualization</text>
+      <text x="120" y="68" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">Plotly Charts</text>
+    </g>
+  </g>
+  
+  <!-- Dependency Arrows -->
+  <!-- Presentation to Use Cases -->
+  <path d="M 960 330 L 960 380" stroke="#4CAF50" stroke-width="4" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- Use Cases to Domain -->
+  <path d="M 960 560 L 960 610" stroke="#4CAF50" stroke-width="4" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- Domain to Infrastructure (Dependency Inversion) -->
+  <path d="M 960 790 L 960 840" stroke="#FF5722" stroke-width="4" fill="none" marker-end="url(#arrowhead)" stroke-dasharray="10,5"/>
+  
+  <!-- Arrow marker definition -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#4CAF50"/>
+    </marker>
+  </defs>
+  
+  <!-- Side Labels -->
+  <g transform="translate(50, 400)">
+    <rect width="80" height="300" rx="10" fill="rgba(0,0,0,0.3)" filter="url(#shadow)"/>
+    <text x="40" y="50" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold" transform="rotate(-90, 40, 50)">Dependency Direction</text>
+    <text x="40" y="150" text-anchor="middle" fill="#4CAF50" font-family="Arial, sans-serif" font-size="12" transform="rotate(-90, 40, 150)">Inward →</text>
+    <text x="40" y="250" text-anchor="middle" fill="#FF5722" font-family="Arial, sans-serif" font-size="12" transform="rotate(-90, 40, 250)">← Inverted</text>
+  </g>
+  
+  <!-- Benefits Box -->
+  <g transform="translate(1500, 150)">
+    <rect width="350" height="500" rx="15" fill="rgba(0,0,0,0.4)" filter="url(#shadow)"/>
+    <text x="175" y="40" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="20" font-weight="bold">Clean Architecture 장점</text>
+    
+    <g transform="translate(20, 70)">
+      <circle cx="15" cy="15" r="8" fill="#4CAF50"/>
+      <text x="35" y="12" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">의존성 역전</text>
+      <text x="35" y="28" fill="white" font-family="Arial, sans-serif" font-size="12">외부 의존성으로부터</text>
+      <text x="35" y="42" fill="white" font-family="Arial, sans-serif" font-size="12">비즈니스 로직 보호</text>
+    </g>
+    
+    <g transform="translate(20, 140)">
+      <circle cx="15" cy="15" r="8" fill="#2196F3"/>
+      <text x="35" y="12" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">테스트 용이성</text>
+      <text x="35" y="28" fill="white" font-family="Arial, sans-serif" font-size="12">각 계층별 독립적</text>
+      <text x="35" y="42" fill="white" font-family="Arial, sans-serif" font-size="12">테스트 가능</text>
+    </g>
+    
+    <g transform="translate(20, 210)">
+      <circle cx="15" cy="15" r="8" fill="#FF9800"/>
+      <text x="35" y="12" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">유지보수성</text>
+      <text x="35" y="28" fill="white" font-family="Arial, sans-serif" font-size="12">변경 사항의 영향</text>
+      <text x="35" y="42" fill="white" font-family="Arial, sans-serif" font-size="12">범위 최소화</text>
+    </g>
+    
+    <g transform="translate(20, 280)">
+      <circle cx="15" cy="15" r="8" fill="#9C27B0"/>
+      <text x="35" y="12" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">확장성</text>
+      <text x="35" y="28" fill="white" font-family="Arial, sans-serif" font-size="12">새로운 기능 추가 시</text>
+      <text x="35" y="42" fill="white" font-family="Arial, sans-serif" font-size="12">기존 코드 영향 최소</text>
+    </g>
+    
+    <g transform="translate(20, 350)">
+      <circle cx="15" cy="15" r="8" fill="#F44336"/>
+      <text x="35" y="12" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">비즈니스 중심</text>
+      <text x="35" y="28" fill="white" font-family="Arial, sans-serif" font-size="12">도메인 로직이</text>
+      <text x="35" y="42" fill="white" font-family="Arial, sans-serif" font-size="12">아키텍처의 중심</text>
+    </g>
+  </g>
+</svg>

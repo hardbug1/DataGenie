@@ -50,7 +50,7 @@ class AnalysisRequestSchema(BaseModel):
         return v.strip()
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "question": "지난 3개월 매출 추이를 보여주세요",
                 "connection_id": "uuid-connection-id",
@@ -95,7 +95,7 @@ class AnalysisResponseSchema(BaseModel):
     timestamp: datetime = Field(default_factory=datetime.utcnow, description="응답 시간")
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "success": True,
                 "data": {
@@ -128,7 +128,7 @@ class ErrorResponseSchema(BaseModel):
     timestamp: datetime = Field(default_factory=datetime.utcnow, description="응답 시간")
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "success": False,
                 "error": {
@@ -154,7 +154,7 @@ class QuestionAnalysisSchema(BaseModel):
     suggested_tables: List[str] = Field(default_factory=list, description="추천 테이블")
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "type": "DB_QUERY",
                 "intent": "매출 데이터 조회 및 시각화",

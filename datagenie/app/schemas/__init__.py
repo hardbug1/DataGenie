@@ -13,7 +13,7 @@ from app.schemas.user import (
     UserProfile
 )
 from app.schemas.auth import (
-    Token,
+    TokenResponse,
     TokenData,
     LoginResponse,
     RefreshTokenRequest
@@ -46,7 +46,7 @@ __all__ = [
     "UserProfile",
     
     # Auth schemas
-    "Token",
+    "TokenResponse",
     "TokenData",
     "LoginResponse",
     "RefreshTokenRequest",
