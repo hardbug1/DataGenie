@@ -11,7 +11,7 @@ from typing import Optional, Dict, Any, TYPE_CHECKING
 
 from sqlalchemy import Column, String, DateTime, Boolean, Text, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy.sql import func
 
 from app.config.database import Base
@@ -31,9 +31,10 @@ class DatabaseConnection(Base):
     """
     
     __tablename__ = "database_connections"
+    __allow_unmapped__ = True  # SQLAlchemy 2.x 호환성
     
     # Primary key
-    id = Column(
+    id: Mapped[str] = mapped_column(
         UUID(as_uuid=True), 
         primary_key=True, 
         default=uuid.uuid4,
@@ -41,7 +42,7 @@ class DatabaseConnection(Base):
     )
     
     # Owner reference
-    user_id = Column(
+    user_id: Mapped[str] = mapped_column(
         UUID(as_uuid=True), 
         ForeignKey("users.id", ondelete="CASCADE"), 
         nullable=False,

@@ -91,9 +91,140 @@ class DataGenieNewUI:
         body {
             font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
             background: var(--bg-primary) !important;
-            color: var(--text-primary) !important;
-            line-height: 1.6 !important;
+            color: #000000 !important;
+        }
+        
+        /* 결과 텍스트 가독성 강화 */
+        .gr-textbox, .gr-textarea, .gr-markdown,
+        .gr-textbox[readonly], .gr-textarea[readonly],
+        div, p, span, label {
+            color: #000000 !important;
+            font-weight: 600 !important;
+        }
+        
+        .gr-textbox[readonly], .gr-textarea[readonly] {
+            background: rgba(255, 255, 255, 0.98) !important;
+            border: 3px solid #6366F1 !important;
+            font-size: 18px !important;
+            color: #000000 !important;
+            line-height: 1.7 !important;
+            font-weight: 800 !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3) !important;
+            padding: 20px !important;
             -webkit-font-smoothing: antialiased !important;
+        }
+        
+        /* === 🌙 다크 모드 대응 === */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%) !important;
+            }
+            
+            .gr-textbox, .gr-textarea, .gr-markdown,
+            .gr-textbox[readonly], .gr-textarea[readonly],
+            div, p, span, label {
+                color: #ffffff !important;
+            }
+            
+            .gr-textbox[readonly], .gr-textarea[readonly] {
+                background: rgba(30, 41, 59, 0.95) !important;
+                border: 3px solid #8b5cf6 !important;
+                color: #ffffff !important;
+                font-weight: 800 !important;
+                font-size: 18px !important;
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) !important;
+                box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4) !important;
+                padding: 20px !important;
+            }
+            
+            .gr-textbox:not([readonly]), 
+            .gr-textarea:not([readonly]) {
+                background: rgba(30, 41, 59, 0.8) !important;
+                border: 1px solid #475569 !important;
+                color: #ffffff !important;
+            }
+            
+            .gr-button {
+                background: rgba(139, 92, 246, 0.9) !important;
+                color: white !important;
+                border: 1px solid #8b5cf6 !important;
+            }
+            
+            /* 다크 모드에서 차트 텍스트 개선 */
+            .plotly .gtitle,
+            .plotly .g-gtitle text,
+            .plotly .xtick text,
+            .plotly .ytick text,
+            .plotly .xtitle text,
+            .plotly .ytitle text,
+            .plotly .legend text,
+            .plotly .legendtext,
+            .plotly .annotation text,
+            .plotly text {
+                color: #ffffff !important;
+                fill: #ffffff !important;
+                font-weight: 600 !important;
+            }
+            
+            /* 다크 모드에서 차트 격자선 */
+            .plotly .gridlayer .xgrid,
+            .plotly .gridlayer .ygrid {
+                stroke: rgba(255, 255, 255, 0.2) !important;
+            }
+        }
+        
+        /* === ☀️ 라이트 모드 강제 === */
+        @media (prefers-color-scheme: light) {
+            .gr-textbox[readonly], .gr-textarea[readonly] {
+                background: rgba(255, 255, 255, 0.98) !important;
+                border: 3px solid #6366F1 !important;
+                color: #000000 !important;
+                font-weight: 800 !important;
+                font-size: 18px !important;
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+                box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3) !important;
+                padding: 20px !important;
+            }
+            
+            /* 라이트 모드에서 차트 텍스트 개선 */
+            .plotly .gtitle,
+            .plotly .g-gtitle text,
+            .plotly .xtick text,
+            .plotly .ytick text,
+            .plotly .xtitle text,
+            .plotly .ytitle text,
+            .plotly .legend text,
+            .plotly .legendtext,
+            .plotly .annotation text,
+            .plotly text {
+                color: #000000 !important;
+                fill: #000000 !important;
+                font-weight: 700 !important;
+            }
+            
+            /* 라이트 모드에서 차트 격자선 */
+            .plotly .gridlayer .xgrid,
+            .plotly .gridlayer .ygrid {
+                stroke: rgba(0, 0, 0, 0.1) !important;
+            }
+        }
+        
+        /* === 📊 차트 기본 텍스트 스타일 === */
+        .plotly .gtitle,
+        .plotly .g-gtitle text,
+        .plotly .xtick text,
+        .plotly .ytick text,
+        .plotly .xtitle text,
+        .plotly .ytitle text,
+        .plotly .legend text,
+        .plotly .legendtext,
+        .plotly .annotation text,
+        .plotly text {
+            color: #000000 !important;
+            fill: #000000 !important;
+            font-weight: 600 !important;
+            font-family: 'Inter', sans-serif !important;
         }
         
         /* === 🎯 UX-First Layout === */

@@ -50,17 +50,44 @@ class DataGenieUI:
             --warning: #d97706;
             --error: #dc2626;
             
-            /* 🌫️ 중성 컬러 시스템 - 더 진한 색상으로 가독성 개선 */
+            /* 🌫️ 중성 컬러 시스템 - 고대비 가독성 개선 */
             --gray-50: #f8fafc;
             --gray-100: #f1f5f9;
             --gray-200: #e2e8f0;
             --gray-300: #cbd5e1;
-            --gray-400: #64748b;    /* 더 진하게 */
-            --gray-500: #475569;    /* 더 진하게 */
-            --gray-600: #334155;    /* 더 진하게 */
-            --gray-700: #1e293b;    /* 더 진하게 */
-            --gray-800: #0f172a;    /* 더 진하게 */
-            --gray-900: #000000;    /* 완전한 검은색으로 */
+            --gray-400: #475569;    /* 더 진한 회색 */
+            --gray-500: #334155;    /* 더 진한 회색 */
+            --gray-600: #1e293b;    /* 더 진한 회색 */
+            --gray-700: #0f172a;    /* 거의 검은색 */
+            --gray-800: #000000;    /* 완전한 검은색 */
+            --gray-900: #000000;    /* 완전한 검은색 */
+            
+            /* 📝 라이트 모드 텍스트 컬러 시스템 */
+            --text-primary-light: #000000;      /* 기본 텍스트 - 완전한 검은색 */
+            --text-secondary-light: #1e293b;    /* 보조 텍스트 - 진한 회색 */
+            --text-muted-light: #334155;        /* 설명 텍스트 - 중간 회색 */
+            --text-success-light: #065f46;      /* 성공 메시지 - 진한 녹색 */
+            --text-warning-light: #92400e;      /* 경고 메시지 - 진한 주황색 */
+            --text-error-light: #991b1b;        /* 오류 메시지 - 진한 빨간색 */
+            --bg-result-light: rgba(255, 255, 255, 0.98);  /* 라이트 모드 결과 배경 */
+            
+            /* 📝 다크 모드 텍스트 컬러 시스템 */
+            --text-primary-dark: #ffffff;       /* 기본 텍스트 - 완전한 흰색 */
+            --text-secondary-dark: #e2e8f0;     /* 보조 텍스트 - 밝은 회색 */
+            --text-muted-dark: #cbd5e1;         /* 설명 텍스트 - 중간 밝은 회색 */
+            --text-success-dark: #34d399;       /* 성공 메시지 - 밝은 녹색 */
+            --text-warning-dark: #fbbf24;       /* 경고 메시지 - 밝은 주황색 */
+            --text-error-dark: #f87171;         /* 오류 메시지 - 밝은 빨간색 */
+            --bg-result-dark: rgba(30, 41, 59, 0.95);      /* 다크 모드 결과 배경 */
+            
+            /* 📝 기본 값 (라이트 모드) */
+            --text-primary: var(--text-primary-light);
+            --text-secondary: var(--text-secondary-light);
+            --text-muted: var(--text-muted-light);
+            --text-success: var(--text-success-light);
+            --text-warning: var(--text-warning-light);
+            --text-error: var(--text-error-light);
+            --bg-result: var(--bg-result-light);
             
             /* ✨ 서브틀 글래스 효과 */
             --glass-bg: rgba(255, 255, 255, 0.95);
@@ -131,10 +158,11 @@ class DataGenieUI:
         
         /* === 글로벌 리셋 및 기본 스타일 === */
         * {
-            font-family: var(--font-primary) !important;
+            font-family: var(--font-body) !important;
             box-sizing: border-box !important;
             margin: 0;
             padding: 0;
+            color: var(--text-primary) !important;
         }
         
         html, body {
@@ -475,20 +503,64 @@ class DataGenieUI:
         }
         
         .gr-markdown {
-            color: var(--gray-900) !important;
+            color: var(--text-primary) !important;
             line-height: 1.6 !important;
             font-family: var(--font-body) !important;
             font-size: var(--font-size-base) !important;
+            background: rgba(255, 255, 255, 0.9) !important;
+            padding: var(--space-4) !important;
+            border-radius: 12px !important;
+            border: 1px solid var(--gray-200) !important;
         }
         
         .gr-markdown h1, .gr-markdown h2, .gr-markdown h3 {
-            color: var(--gray-900) !important;
+            color: var(--text-primary) !important;
             font-weight: 600 !important;
             margin: var(--space-4) 0 var(--space-3) 0 !important;
             font-family: var(--font-display) !important;
         }
         
         .gr-markdown h1 { font-size: var(--font-size-large) !important; }
+        
+        /* 분석 결과 영역 특별 스타일링 */
+        .gr-markdown p {
+            color: var(--text-primary) !important;
+            font-weight: 500 !important;
+            margin-bottom: var(--space-2) !important;
+        }
+        
+        .gr-markdown ul, .gr-markdown ol {
+            color: var(--text-primary) !important;
+            margin-left: var(--space-4) !important;
+        }
+        
+        .gr-markdown li {
+            color: var(--text-primary) !important;
+            font-weight: 500 !important;
+            margin-bottom: var(--space-1) !important;
+        }
+        
+        .gr-markdown strong {
+            color: var(--text-primary) !important;
+            font-weight: 700 !important;
+        }
+        
+        .gr-markdown code {
+            color: var(--text-primary) !important;
+            background: var(--gray-100) !important;
+            padding: 2px 6px !important;
+            border-radius: 4px !important;
+            font-family: var(--font-mono) !important;
+        }
+        
+        .gr-markdown pre {
+            color: var(--text-primary) !important;
+            background: var(--gray-50) !important;
+            padding: var(--space-3) !important;
+            border-radius: 8px !important;
+            border: 1px solid var(--gray-200) !important;
+            font-family: var(--font-mono) !important;
+        }
         .gr-markdown h2 { font-size: var(--font-size-large) !important; }
         .gr-markdown h3 { font-size: var(--font-size-large) !important; }
         
@@ -918,6 +990,431 @@ class DataGenieUI:
         .gr-form .gr-dropdown + .gr-dropdown {
             margin-top: var(--space-3) !important;
         }
+        
+        /* === 결과 가독성 특별 개선 === */
+        
+        /* 모든 텍스트 요소 강화 */
+        .gr-textbox, .gr-textarea, .gr-markdown, 
+        .gr-chatbot, .gr-json, .gr-code,
+        div, p, span, label, button {
+            color: var(--text-primary) !important;
+            font-weight: 500 !important;
+        }
+        
+        /* 결과 출력 영역 특별 처리 */
+        .gr-textbox[readonly], 
+        .gr-textarea[readonly] {
+            background: var(--bg-result) !important;
+            color: var(--text-primary) !important;
+            font-weight: 700 !important;
+            font-size: 17px !important;
+            line-height: 1.7 !important;
+            border: 3px solid var(--primary) !important;
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.25) !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15) !important;
+            padding: 20px !important;
+        }
+        
+        /* === 📝 분석 결과 전용 스타일링 === */
+        
+        /* 분석 결과 컨테이너 강화 */
+        .gr-textbox[readonly]:has-text("분석"),
+        .gr-textarea[readonly]:has-text("분석"),
+        .gr-textbox[readonly][title*="분석"],
+        .gr-textarea[readonly][title*="분석"] {
+            background: var(--bg-result) !important;
+            color: var(--text-primary) !important;
+            font-weight: 800 !important;
+            font-size: 18px !important;
+            line-height: 1.8 !important;
+            border: 3px solid var(--primary) !important;
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3) !important;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+            padding: 25px !important;
+        }
+        
+        /* 결과 텍스트 내용 강화 */
+        .gr-textbox[readonly] *,
+        .gr-textarea[readonly] * {
+            color: var(--text-primary) !important;
+            font-weight: 700 !important;
+        }
+        
+        /* 탭 내용 영역 */
+        .gr-tab-content {
+            color: var(--text-primary) !important;
+        }
+        
+        /* === 📊 Plotly 차트 텍스트 요소들 === */
+        
+        /* 차트 제목 */
+        .plotly .gtitle,
+        .plotly .g-gtitle text {
+            color: var(--text-primary) !important;
+            fill: var(--text-primary) !important;
+        }
+        
+        /* 축 레이블 및 눈금 텍스트 */
+        .plotly .xtick text,
+        .plotly .ytick text,
+        .plotly .ztick text,
+        .plotly .xaxislayer-above text,
+        .plotly .yaxislayer-above text,
+        .plotly .zaxislayer-above text {
+            color: var(--text-primary) !important;
+            fill: var(--text-primary) !important;
+        }
+        
+        /* 축 제목 */
+        .plotly .xtitle,
+        .plotly .ytitle,
+        .plotly .ztitle,
+        .plotly .xtitle text,
+        .plotly .ytitle text,
+        .plotly .ztitle text {
+            color: var(--text-primary) !important;
+            fill: var(--text-primary) !important;
+        }
+        
+        /* 범례 텍스트 */
+        .plotly .legend text,
+        .plotly .legendtext,
+        .plotly .legend .legendtext {
+            color: var(--text-primary) !important;
+            fill: var(--text-primary) !important;
+        }
+        
+        /* 데이터 레이블 및 주석 */
+        .plotly .annotation text,
+        .plotly .textpoint,
+        .plotly .textpoint text,
+        .plotly text {
+            color: var(--text-primary) !important;
+            fill: var(--text-primary) !important;
+        }
+        
+        /* 호버 정보 */
+        .plotly .hovertext,
+        .plotly .hoverlayer text {
+            color: var(--text-primary) !important;
+            fill: var(--text-primary) !important;
+        }
+        
+        /* 컬러바 레이블 */
+        .plotly .cbtitle,
+        .plotly .cbcolorbar text,
+        .plotly .colorbar text {
+            color: var(--text-primary) !important;
+            fill: var(--text-primary) !important;
+        }
+        
+        /* 데이터 테이블 */
+        .gr-dataframe {
+            color: var(--text-primary) !important;
+        }
+        
+        .gr-dataframe td, .gr-dataframe th {
+            color: var(--text-primary) !important;
+            font-weight: 500 !important;
+        }
+        
+        /* === 🌙 다크 모드 대응 === */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                /* 다크 모드에서 텍스트 컬러 변경 */
+                --text-primary: var(--text-primary-dark);
+                --text-secondary: var(--text-secondary-dark);
+                --text-muted: var(--text-muted-dark);
+                --text-success: var(--text-success-dark);
+                --text-warning: var(--text-warning-dark);
+                --text-error: var(--text-error-dark);
+                --bg-result: var(--bg-result-dark);
+                
+                /* 다크 모드 배경 조정 */
+                --glass-bg: rgba(30, 41, 59, 0.85);
+                --glass-border: rgba(100, 116, 139, 0.3);
+                --gray-50: #1e293b;
+                --gray-100: #334155;
+                --gray-200: #475569;
+            }
+            
+            /* 다크 모드에서 앱 배경 */
+            .gradio-container {
+                background: linear-gradient(135deg, 
+                    #0f172a 0%, 
+                    #1e293b 50%, 
+                    #334155 100%) !important;
+            }
+            
+            /* 다크 모드에서 결과 영역 */
+            .gr-textbox[readonly], 
+            .gr-textarea[readonly] {
+                background: var(--bg-result-dark) !important;
+                border: 3px solid #8b5cf6 !important;
+                color: var(--text-primary-dark) !important;
+                font-weight: 800 !important;
+                font-size: 18px !important;
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) !important;
+                box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4) !important;
+            }
+            
+            /* 다크 모드에서 분석 결과 내용 */
+            .gr-textbox[readonly] *,
+            .gr-textarea[readonly] * {
+                color: var(--text-primary-dark) !important;
+                font-weight: 800 !important;
+            }
+            
+            /* 다크 모드에서 마크다운 */
+            .gr-markdown {
+                background: var(--bg-result) !important;
+                border: 1px solid var(--gray-200) !important;
+                color: var(--text-primary) !important;
+            }
+            
+            /* 다크 모드에서 버튼 */
+            .gr-button {
+                background: rgba(139, 92, 246, 0.9) !important;
+                color: white !important;
+                border: 1px solid #8b5cf6 !important;
+            }
+            
+            /* 다크 모드에서 입력 필드 */
+            .gr-textbox:not([readonly]), 
+            .gr-textarea:not([readonly]) {
+                background: rgba(30, 41, 59, 0.8) !important;
+                border: 1px solid var(--gray-200) !important;
+                color: var(--text-primary) !important;
+            }
+            
+            /* 다크 모드에서 차트 텍스트 강화 */
+            .plotly .gtitle,
+            .plotly .g-gtitle text,
+            .plotly .xtick text,
+            .plotly .ytick text,
+            .plotly .ztick text,
+            .plotly .xtitle text,
+            .plotly .ytitle text,
+            .plotly .ztitle text,
+            .plotly .legend text,
+            .plotly .legendtext,
+            .plotly .annotation text,
+            .plotly text {
+                color: var(--text-primary-dark) !important;
+                fill: var(--text-primary-dark) !important;
+                font-weight: 600 !important;
+            }
+            
+            /* 다크 모드에서 차트 배경 */
+            .plotly .plot .bg {
+                fill: rgba(30, 41, 59, 0.1) !important;
+            }
+            
+            /* 다크 모드에서 차트 격자선 */
+            .plotly .gridlayer .xgrid,
+            .plotly .gridlayer .ygrid {
+                stroke: rgba(255, 255, 255, 0.2) !important;
+            }
+        }
+        
+        /* === ☀️ 라이트 모드 강제 (밝은 배경에서) === */
+        @media (prefers-color-scheme: light) {
+            :root {
+                --text-primary: var(--text-primary-light);
+                --text-secondary: var(--text-secondary-light);
+                --text-muted: var(--text-muted-light);
+                --text-success: var(--text-success-light);
+                --text-warning: var(--text-warning-light);
+                --text-error: var(--text-error-light);
+                --bg-result: var(--bg-result-light);
+            }
+            
+            /* 라이트 모드에서 결과 영역 강조 */
+            .gr-textbox[readonly], 
+            .gr-textarea[readonly] {
+                background: var(--bg-result-light) !important;
+                border: 3px solid #6366f1 !important;
+                color: var(--text-primary-light) !important;
+                font-weight: 800 !important;
+                font-size: 18px !important;
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+                box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3) !important;
+            }
+            
+            /* 라이트 모드에서 분석 결과 내용 */
+            .gr-textbox[readonly] *,
+            .gr-textarea[readonly] * {
+                color: var(--text-primary-light) !important;
+                font-weight: 800 !important;
+            }
+            
+            /* 라이트 모드에서 차트 텍스트 강화 */
+            .plotly .gtitle,
+            .plotly .g-gtitle text,
+            .plotly .xtick text,
+            .plotly .ytick text,
+            .plotly .ztick text,
+            .plotly .xtitle text,
+            .plotly .ytitle text,
+            .plotly .ztitle text,
+            .plotly .legend text,
+            .plotly .legendtext,
+            .plotly .annotation text,
+            .plotly text {
+                color: var(--text-primary-light) !important;
+                fill: var(--text-primary-light) !important;
+                font-weight: 700 !important;
+            }
+            
+            /* 라이트 모드에서 차트 격자선 */
+            .plotly .gridlayer .xgrid,
+            .plotly .gridlayer .ygrid {
+                stroke: rgba(0, 0, 0, 0.1) !important;
+            }
+        }
+        
+        /* === 🔄 자동 테마 감지 및 대비 최적화 === */
+        
+        /* 밝은 배경 위의 텍스트 (자동 감지) */
+        .light-background {
+            color: var(--text-primary-light) !important;
+            background: rgba(255, 255, 255, 0.95) !important;
+        }
+        
+        /* 어두운 배경 위의 텍스트 (자동 감지) */
+        .dark-background {
+            color: var(--text-primary-dark) !important;
+            background: rgba(30, 41, 59, 0.95) !important;
+        }
+        
+        /* 고대비 모드 대응 */
+        @media (prefers-contrast: high) {
+            :root {
+                --text-primary: #000000;
+                --bg-result: #ffffff;
+            }
+            
+            [data-theme="dark"] {
+                --text-primary: #ffffff;
+                --bg-result: #000000;
+            }
+        }
+        
+        """
+        
+        # 🤖 동적 테마 감지 JavaScript
+        dynamic_theme_js = """
+        <script>
+        // 동적 배경 밝기 감지 및 텍스트 색상 자동 조정
+        function detectBackgroundBrightness(element) {
+            const style = window.getComputedStyle(element);
+            const bgColor = style.backgroundColor;
+            
+            // RGB 값 추출
+            const rgb = bgColor.match(/\d+/g);
+            if (!rgb) return 'light';
+            
+            // 밝기 계산 (perceived brightness formula)
+            const brightness = (parseInt(rgb[0]) * 299 + parseInt(rgb[1]) * 587 + parseInt(rgb[2]) * 114) / 1000;
+            
+            return brightness > 128 ? 'light' : 'dark';
+        }
+        
+        function applyContrastOptimization() {
+            // 모든 텍스트 출력 영역 감지
+            const outputElements = document.querySelectorAll(
+                '.gr-textbox[readonly], .gr-textarea[readonly], .gr-markdown'
+            );
+            
+            outputElements.forEach(el => {
+                const parentBrightness = detectBackgroundBrightness(el.parentElement || document.body);
+                
+                if (parentBrightness === 'dark') {
+                    el.style.color = '#ffffff';
+                    el.style.background = 'rgba(30, 41, 59, 0.95)';
+                    el.style.border = '3px solid #8b5cf6';
+                    el.style.textShadow = '0 2px 4px rgba(0, 0, 0, 0.5)';
+                    el.style.boxShadow = '0 8px 25px rgba(139, 92, 246, 0.4)';
+                } else {
+                    el.style.color = '#000000';
+                    el.style.background = 'rgba(255, 255, 255, 0.98)';
+                    el.style.border = '3px solid #6366f1';
+                    el.style.textShadow = '0 1px 2px rgba(0, 0, 0, 0.1)';
+                    el.style.boxShadow = '0 8px 25px rgba(99, 102, 241, 0.3)';
+                }
+                
+                el.style.fontWeight = '800';
+                el.style.fontSize = '18px';
+                el.style.lineHeight = '1.7';
+                el.style.padding = '20px';
+                
+                // 분석 결과 영역 특별 처리
+                if (el.value && (el.value.includes('분석') || el.value.includes('결과') || el.value.includes('인사이트'))) {
+                    el.style.fontWeight = '900';
+                    el.style.fontSize = '19px';
+                    el.style.padding = '25px';
+                    if (parentBrightness === 'dark') {
+                        el.style.color = '#ffffff';
+                        el.style.textShadow = '0 3px 6px rgba(0, 0, 0, 0.7)';
+                    } else {
+                        el.style.color = '#000000';
+                        el.style.textShadow = '0 2px 4px rgba(0, 0, 0, 0.2)';
+                    }
+                }
+            });
+            
+            // 📊 차트 텍스트 요소들 최적화
+            const chartTextElements = document.querySelectorAll(
+                '.plotly .gtitle, .plotly .g-gtitle text, ' +
+                '.plotly .xtick text, .plotly .ytick text, .plotly .ztick text, ' +
+                '.plotly .xtitle text, .plotly .ytitle text, .plotly .ztitle text, ' +
+                '.plotly .legend text, .plotly .legendtext, ' +
+                '.plotly .annotation text, .plotly text'
+            );
+            
+            const bodyBrightness = detectBackgroundBrightness(document.body);
+            const chartTextColor = bodyBrightness === 'dark' ? '#ffffff' : '#000000';
+            
+            chartTextElements.forEach(el => {
+                el.style.color = chartTextColor;
+                el.style.fill = chartTextColor;
+                el.style.fontWeight = '600';
+            });
+            
+            // 📈 차트 격자선 색상 조정
+            const gridElements = document.querySelectorAll(
+                '.plotly .gridlayer .xgrid, .plotly .gridlayer .ygrid'
+            );
+            
+            const gridColor = bodyBrightness === 'dark' 
+                ? 'rgba(255, 255, 255, 0.2)' 
+                : 'rgba(0, 0, 0, 0.1)';
+                
+            gridElements.forEach(el => {
+                el.style.stroke = gridColor;
+            });
+        }
+        
+        // 초기 실행
+        document.addEventListener('DOMContentLoaded', applyContrastOptimization);
+        
+        // Gradio 업데이트 감지
+        const observer = new MutationObserver(applyContrastOptimization);
+        observer.observe(document.body, { 
+            childList: true, 
+            subtree: true, 
+            attributes: true, 
+            attributeFilter: ['style', 'class'] 
+        });
+        
+        // 윈도우 리사이즈 시에도 재적용
+        window.addEventListener('resize', applyContrastOptimization);
+        
+        // 시스템 테마 변경 감지
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyContrastOptimization);
+        }
+        </script>
         """
         
         # 🌟 모던 심플 테마 - 가독성과 심플함 중심
@@ -954,13 +1451,14 @@ class DataGenieUI:
             title="🧞‍♂️ DataGenie - AI 데이터 분석 비서",
             theme=modern_simple_theme,
             css=custom_css,
-            head="""
+            head=f"""
             <style>
                 /* CSS 우선순위를 높이기 위한 추가 스타일 */
-                .gradio-container { 
+                .gradio-container {{ 
                     font-family: 'Inter', sans-serif !important;
-                }
+                }}
             </style>
+            {dynamic_theme_js}
             """
         ) as app:
             

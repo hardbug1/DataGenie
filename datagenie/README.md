@@ -94,28 +94,64 @@ DataGenie는 자연어를 통해 데이터베이스를 조회하고 Excel 파일
    
 ### 🚀 직접 실행 (개발 모드)
 
-1. **Python 환경 설정**
-   ```bash
-   conda activate p3  # 또는 원하는 Python 환경
-   cd datagenie
-   pip install -r requirements/base.txt
-   ```
+#### 🧪 Mock 모드 (빠른 테스트)
+```bash
+# 1. Python 환경 설정
+conda activate p3  # 또는 원하는 Python 환경
+cd datagenie
+pip install -r requirements/base.txt
 
-2. **환경변수 설정**
-   ```bash
-   cp env.example .env
-   # .env 파일에서 OPENAI_API_KEY 설정
-   ```
+# 2. 환경변수 설정
+cp env.example .env
+# .env 파일에서 USE_REAL_IMPLEMENTATIONS=false 설정
 
-3. **Gradio 웹 인터페이스 실행**
-   ```bash
-   python -m app.frontend.launcher
-   ```
+# 3. Gradio 웹 인터페이스 실행
+python -m app.frontend.launcher
+```
+
+#### 🚀 실제 구현체 모드 (프로덕션)
+```bash
+# 1. 데이터베이스 설정
+docker run -d --name postgres \
+  -e POSTGRES_PASSWORD=password \
+  -e POSTGRES_DB=datagenie \
+  -p 5432:5432 postgres:15
+
+# 2. 환경변수 설정
+cp env.example .env
+# .env 파일에서 다음 설정:
+# USE_REAL_IMPLEMENTATIONS=true
+# OPENAI_API_KEY=your-openai-api-key-here
+# DATABASE_URL=postgresql+asyncpg://postgres:password@localhost:5432/datagenie
+
+# 3. 마이그레이션 실행
+alembic upgrade head
+
+# 4. 기본 사용자 생성
+python scripts/create_users.py create
+
+# 5. 애플리케이션 실행
+python -m app.main
+# 또는 Gradio 인터페이스
+python -m app.frontend.launcher
+```
 
 4. **브라우저에서 접속**
    ```
    http://localhost:7860
    ```
+
+### 🔐 기본 사용자 계정
+
+실제 구현체 모드에서는 다음 기본 계정들을 사용할 수 있습니다:
+
+| 역할 | 사용자명 | 비밀번호 | 권한 |
+|------|----------|----------|------|
+| 관리자 | `admin` | `admin123` | 모든 권한 |
+| 분석가 | `analyst` | `analyst123` | 분석, 연결 생성 |
+| 일반 사용자 | `user` | `user123` | 기본 분석 |
+
+**⚠️ 보안 주의사항**: 프로덕션 환경에서는 반드시 기본 비밀번호를 변경하세요!
 
 ## 📁 프로젝트 구조 (Clean Architecture)
 

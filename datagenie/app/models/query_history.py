@@ -31,6 +31,7 @@ class QueryHistory(Base):
     """
     
     __tablename__ = "query_history"
+    __allow_unmapped__ = True  # SQLAlchemy 2.x 호환성
     
     # Primary key
     id = Column(

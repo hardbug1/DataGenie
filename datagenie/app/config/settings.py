@@ -37,13 +37,22 @@ class Settings(BaseSettings):
     jwt_secret_key: str = Field(default_factory=lambda: secrets.token_urlsafe(32), env="JWT_SECRET_KEY")
     jwt_algorithm: str = Field(default="HS256", env="JWT_ALGORITHM")
     jwt_expiration_hours: int = Field(default=24, env="JWT_EXPIRATION_HOURS")
+    jwt_access_token_expire_minutes: int = Field(default=30, env="JWT_ACCESS_TOKEN_EXPIRE_MINUTES")
+    jwt_refresh_token_expire_days: int = Field(default=7, env="JWT_REFRESH_TOKEN_EXPIRE_DAYS")
+    encryption_key: str = Field(default_factory=lambda: secrets.token_urlsafe(32), env="ENCRYPTION_KEY")
     
     # OpenAI Configuration
-    openai_api_key: str = Field(..., env="OPENAI_API_KEY")
+    openai_api_key: Optional[str] = Field(default=None, env="OPENAI_API_KEY")
     openai_model: str = Field(default="gpt-4", env="OPENAI_MODEL")
     openai_model_fallback: str = Field(default="gpt-3.5-turbo", env="OPENAI_MODEL_FALLBACK")
     openai_max_tokens: int = Field(default=2000, env="OPENAI_MAX_TOKENS")
     openai_temperature: float = Field(default=0.0, env="OPENAI_TEMPERATURE")
+    
+    # LLM Engine Configuration
+    use_llm_engine: bool = Field(default=False, env="USE_LLM_ENGINE")
+    llm_cache_ttl: int = Field(default=3600, env="LLM_CACHE_TTL")
+    llm_max_retries: int = Field(default=2, env="LLM_MAX_RETRIES")
+    llm_timeout: int = Field(default=30, env="LLM_TIMEOUT")
     
     # Database Configuration
     database_url: str = Field(
@@ -97,10 +106,16 @@ class Settings(BaseSettings):
     @classmethod
     def validate_openai_api_key(cls, v):
         """Validate OpenAI API key format"""
-        if not v or v == "your-openai-api-key-here":
-            raise ValueError("OpenAI API key must be provided")
+        # OpenAI API 키는 선택사항 (Mock 모드에서는 불필요)
+        if v is None or v == "":
+            return None
+        
+        if v == "your-openai-api-key-here":
+            return None  # 기본값인 경우 None으로 처리
+        
         if not v.startswith("sk-"):
             raise ValueError("OpenAI API key must start with 'sk-'")
+        
         return v
     
     @field_validator("log_level")

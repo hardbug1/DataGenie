@@ -96,6 +96,27 @@ def get_session_maker() -> async_sessionmaker[AsyncSession]:
     return _async_session_maker
 
 
+async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
+    """
+    Get async database session for repositories.
+    
+    This is used by repository implementations to get
+    database sessions for data operations.
+    """
+    session_maker = get_session_maker()
+    async with session_maker() as session:
+        try:
+            logger.debug("Async database session created")
+            yield session
+        except Exception as e:
+            logger.error("Async database session error", error=str(e))
+            await session.rollback()
+            raise
+        finally:
+            await session.close()
+            logger.debug("Async database session closed")
+
+
 async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
     """
     Dependency function to get database session.

@@ -32,6 +32,7 @@ class UserSession(Base):
     """
     
     __tablename__ = "user_sessions"
+    __allow_unmapped__ = True  # SQLAlchemy 2.x 호환성
     
     # Primary key
     id = Column(

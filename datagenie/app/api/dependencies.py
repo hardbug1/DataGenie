@@ -11,6 +11,7 @@ from typing import Dict, Any
 import structlog
 
 from app.use_cases.analysis.execute_analysis_use_case import ExecuteAnalysisUseCase
+from app.use_cases.auth.authenticate_user_use_case import AuthenticateUserUseCase
 from app.infrastructure.di_container import get_di_container
 from app.core.auth.jwt_manager import JWTManager, TokenType
 from app.core.security.sql_validator import SQLSecurityValidator
@@ -140,6 +141,25 @@ async def get_query_history_use_case():
     """쿼리 이력 Use Case 의존성 주입"""
     # TODO: 구현 예정
     pass
+
+
+async def get_authenticate_user_use_case() -> AuthenticateUserUseCase:
+    """
+    사용자 인증 Use Case 의존성 주입
+    
+    Clean Architecture: Composition Root
+    의존성 주입 컨테이너에서 인증 Use Case를 가져옵니다.
+    """
+    try:
+        container = get_di_container()
+        return container.get_authenticate_user_use_case()
+        
+    except Exception as e:
+        logger.error("인증 Use Case 의존성 주입 오류", error=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="인증 서비스 초기화 오류가 발생했습니다"
+        )
 
 
 async def get_user_management_use_case():

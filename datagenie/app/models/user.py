@@ -25,6 +25,7 @@ class User(Base):
     """
     
     __tablename__ = "users"
+    __allow_unmapped__ = True  # SQLAlchemy 2.x 호환성
     
     # Primary key
     id: Mapped[uuid.UUID] = mapped_column(

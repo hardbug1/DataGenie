@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DataGenie 테마 테스트</title>
+    <style>
+        :root {
+            /* 라이트 모드 */
+            --text-primary-light: #000000;
+            --text-secondary-light: #1e293b;
+            --bg-result-light: rgba(255, 255, 255, 0.98);
+            
+            /* 다크 모드 */
+            --text-primary-dark: #ffffff;
+            --text-secondary-dark: #e2e8f0;
+            --bg-result-dark: rgba(30, 41, 59, 0.95);
+            
+            /* 기본값 */
+            --text-primary: var(--text-primary-light);
+            --bg-result: var(--bg-result-light);
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .result-box {
+            background: var(--bg-result);
+            color: var(--text-primary);
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 12px;
+            border: 2px solid #6366f1;
+            font-weight: 600;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .theme-toggle {
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            border-radius: 8px;
+            background: #6366f1;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        /* 다크 모드 */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --text-primary: var(--text-primary-dark);
+                --bg-result: var(--bg-result-dark);
+            }
+            
+            body {
+                background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+                color: #ffffff;
+            }
+            
+            .result-box {
+                border-color: #8b5cf6;
+            }
+        }
+        
+        /* 라이트 모드 */
+        @media (prefers-color-scheme: light) {
+            body {
+                background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+                color: #000000;
+            }
+        }
+        
+        /* 수동 테마 클래스 */
+        .dark-theme {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%) !important;
+            color: #ffffff !important;
+        }
+        
+        .dark-theme .result-box {
+            background: var(--bg-result-dark) !important;
+            color: var(--text-primary-dark) !important;
+            border-color: #8b5cf6 !important;
+        }
+        
+        .light-theme {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%) !important;
+            color: #000000 !important;
+        }
+        
+        .light-theme .result-box {
+            background: var(--bg-result-light) !important;
+            color: var(--text-primary-light) !important;
+            border-color: #6366f1 !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧞‍♂️ DataGenie 테마 테스트</h1>
+        
+        <div class="controls">
+            <button class="theme-toggle" onclick="toggleTheme('light')">☀️ 라이트 모드</button>
+            <button class="theme-toggle" onclick="toggleTheme('dark')">🌙 다크 모드</button>
+            <button class="theme-toggle" onclick="toggleTheme('auto')">🔄 자동 모드</button>
+        </div>
+        
+        <div class="result-box">
+            <h3>📊 분석 결과</h3>
+            <p><strong>매출 증가율:</strong> 지난 3개월간 15.2% 증가했습니다.</p>
+            <ul>
+                <li>1월: 125,000원</li>
+                <li>2월: 142,300원</li>
+                <li>3월: 158,750원</li>
+            </ul>
+            <p><strong>💡 권장사항:</strong> 현재 증가 추세를 유지하기 위한 마케팅 전략을 강화하세요.</p>
+        </div>
+        
+        <div class="result-box">
+            <h3>🔍 상세 데이터</h3>
+            <p>이 텍스트는 다크 모드에서는 흰색으로, 라이트 모드에서는 검은색으로 표시됩니다.</p>
+            <code style="background: rgba(100, 116, 139, 0.2); padding: 4px 8px; border-radius: 4px;">
+                SELECT * FROM sales WHERE date >= '2024-01-01'
+            </code>
+        </div>
+        
+        <div class="result-box">
+            <h3>📊 차트 데이터 예시</h3>
+            <div style="background: rgba(100, 116, 139, 0.1); padding: 15px; border-radius: 8px; margin: 10px 0;">
+                <p><strong>차트 제목:</strong> 월별 매출 현황</p>
+                <p><strong>X축:</strong> 1월, 2월, 3월, 4월</p>
+                <p><strong>Y축:</strong> 125K, 142K, 158K, 175K</p>
+                <p><strong>범례:</strong> 매출액(만원)</p>
+            </div>
+            <p>※ 실제 Plotly 차트에서 모든 텍스트 요소(제목, 축 레이블, 범례, 데이터 레이블)가 테마에 맞게 자동 조정됩니다.</p>
+        </div>
+        
+        <div style="margin-top: 30px; padding: 20px; background: rgba(99, 102, 241, 0.1); border-radius: 12px;">
+            <h3>✨ 개선된 테마 기능</h3>
+            <p>• <strong>자동 감지:</strong> 시스템 설정에 따라 자동으로 다크/라이트 모드 전환</p>
+            <p>• <strong>고대비:</strong> 밝은 배경에는 검은 글씨, 어두운 배경에는 흰 글씨</p>
+            <p>• <strong>차트 최적화:</strong> Plotly 차트의 모든 텍스트 요소 색상 자동 조정</p>
+            <p>• <strong>실시간 적용:</strong> 테마 변경시 즉시 반영</p>
+            <p>• <strong>JavaScript 감지:</strong> 배경 밝기 실시간 분석 및 최적 대비 적용</p>
+        </div>
+    </div>
+    
+    <script>
+        function toggleTheme(mode) {
+            const body = document.body;
+            
+            // 기존 테마 클래스 제거
+            body.classList.remove('light-theme', 'dark-theme');
+            
+            if (mode === 'light') {
+                body.classList.add('light-theme');
+            } else if (mode === 'dark') {
+                body.classList.add('dark-theme');
+            }
+            // auto 모드는 CSS 미디어 쿼리가 자동으로 처리
+        }
+        
+        // 시스템 테마 변경 감지
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                if (!document.body.classList.contains('light-theme') && 
+                    !document.body.classList.contains('dark-theme')) {
+                    // 자동 모드일 때만 시스템 설정 따라감
+                    console.log('시스템 테마 변경됨:', e.matches ? 'dark' : 'light');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -11,7 +11,8 @@ from typing import Dict, Any
 import structlog
 
 from app.core.auth.jwt_manager import JWTManager, AuthenticationError
-from app.api.dependencies import get_jwt_manager, get_current_user
+from app.api.dependencies import get_jwt_manager, get_current_user, get_authenticate_user_use_case
+from app.use_cases.auth.authenticate_user_use_case import AuthenticateUserUseCase, AuthenticationRequest
 from app.schemas.auth import (
     LoginRequest,
     LoginResponse,
@@ -34,49 +35,35 @@ router = APIRouter(prefix="/auth", tags=["authentication"])
 )
 async def login(
     request: LoginRequest,
-    jwt_manager: JWTManager = Depends(get_jwt_manager)
+    jwt_manager: JWTManager = Depends(get_jwt_manager),
+    auth_use_case: AuthenticateUserUseCase = Depends(get_authenticate_user_use_case)
 ) -> LoginResponse:
     """
     사용자 로그인
     
-    TODO: 실제 사용자 인증 로직 구현 필요
-    현재는 개발용 더미 구현
+    실제 사용자 인증 로직 구현
     """
     try:
-        # TODO: 실제 사용자 인증 (데이터베이스 조회, 비밀번호 검증)
-        # 현재는 개발용 더미 인증
-        if request.username == "admin" and request.password == "admin123":
-            user_data = {
-                "user_id": "admin-user-id",
-                "username": "admin",
-                "email": "admin@datagenie.com",
-                "role": "admin",
-                "permissions": [
-                    "analysis:execute",
-                    "query:read",
-                    "query:write",
-                    "user:manage",
-                    "connection:manage"
-                ]
-            }
-        elif request.username == "user" and request.password == "user123":
-            user_data = {
-                "user_id": "test-user-id",
-                "username": "user",
-                "email": "user@datagenie.com",
-                "role": "user",
-                "permissions": [
-                    "analysis:execute",
-                    "query:read"
-                ]
-            }
-        else:
+        # 1. 인증 요청 생성
+        auth_request = AuthenticationRequest(
+            username=request.username,
+            password=request.password
+        )
+        
+        # 2. 사용자 인증 실행
+        auth_result = await auth_use_case.execute(auth_request)
+        
+        # 3. 인증 실패 처리
+        if not auth_result.success:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="잘못된 사용자명 또는 비밀번호입니다"
+                detail=auth_result.error_message or "인증에 실패했습니다"
             )
         
-        # JWT 토큰 생성
+        # 4. 사용자 데이터 추출
+        user_data = auth_result.user_data
+        
+        # 5. JWT 토큰 생성
         access_token = jwt_manager.create_access_token(
             user_id=user_data["user_id"],
             username=user_data["username"],
